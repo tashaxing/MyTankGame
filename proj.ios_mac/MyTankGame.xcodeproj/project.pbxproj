@@ -53,6 +53,7 @@
 		D6B0611B1803AB670077942B /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B0611A1803AB670077942B /* CoreMotion.framework */; };
 		E219B77623058F4300409B74 /* game_scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B77423058F4300409B74 /* game_scene.cpp */; };
 		E219B7792305929E00409B74 /* welcome_scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B7782305929E00409B74 /* welcome_scene.cpp */; };
+		E219B77C23059BD800409B74 /* joypad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B77B23059BD800409B74 /* joypad.cpp */; };
 		ED545A7C1B68A1F400C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7B1B68A1F400C3958E /* libiconv.dylib */; };
 		ED545A7E1B68A1FA00C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7D1B68A1FA00C3958E /* libiconv.dylib */; };
 /* End PBXBuildFile section */
@@ -142,6 +143,8 @@
 		E219B77523058F4300409B74 /* game_scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = game_scene.h; sourceTree = "<group>"; };
 		E219B7772305928900409B74 /* welcome_scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = welcome_scene.h; sourceTree = "<group>"; };
 		E219B7782305929E00409B74 /* welcome_scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = welcome_scene.cpp; sourceTree = "<group>"; };
+		E219B77A23059BC800409B74 /* joypad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = joypad.h; sourceTree = "<group>"; };
+		E219B77B23059BD800409B74 /* joypad.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = joypad.cpp; sourceTree = "<group>"; };
 		ED545A7B1B68A1F400C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/lib/libiconv.dylib; sourceTree = DEVELOPER_DIR; };
 		ED545A7D1B68A1FA00C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -285,10 +288,12 @@
 			children = (
 				46880B8419C43A87006E1F66 /* AppDelegate.cpp */,
 				46880B8519C43A87006E1F66 /* AppDelegate.h */,
-				E219B77423058F4300409B74 /* game_scene.cpp */,
 				E219B77523058F4300409B74 /* game_scene.h */,
+				E219B77423058F4300409B74 /* game_scene.cpp */,
 				E219B7772305928900409B74 /* welcome_scene.h */,
 				E219B7782305929E00409B74 /* welcome_scene.cpp */,
+				E219B77A23059BC800409B74 /* joypad.h */,
+				E219B77B23059BD800409B74 /* joypad.cpp */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -447,6 +452,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E219B77C23059BD800409B74 /* joypad.cpp in Sources */,
 				1AF87B781F6F77F7007BE51C /* AppController.mm in Sources */,
 				E219B77623058F4300409B74 /* game_scene.cpp in Sources */,
 				1AF87B8B1F6F782A007BE51C /* RootViewController.mm in Sources */,
