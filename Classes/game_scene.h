@@ -17,7 +17,8 @@ public:
     virtual void update(float dt);
     
     CREATE_FUNC(GameScene);
-
+    
+    int m_round = 1; // 第几关，默认第一关
 };
 
 #endif /* _GAME_SCENE_H_ */
