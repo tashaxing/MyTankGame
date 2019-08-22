@@ -22,7 +22,8 @@ bool WelcomeScene::init()
     // 添加欢迎页背景
     Sprite* background = Sprite::create("img/menu/welcome.png");
     background->setContentSize(visible_size);
-    background->setPosition(visible_origin.x + visible_size.width / 2, visible_origin.y + visible_size.height / 2);
+    background->setPosition(visible_origin.x + visible_size.width / 2,
+                            visible_origin.y + visible_size.height / 2);
     addChild(background);
     
     // 添加开始游戏按钮
