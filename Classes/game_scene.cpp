@@ -38,15 +38,16 @@ bool GameScene::init()
     
     level_splash->setPosition(visible_origin.x + visible_size.width / 2,
                               visible_origin.y + visible_size.height / 2);
-//    addChild(level_splash);
+    addChild(level_splash);
     
     // 播放动画，关卡显示消失
     
-    // 加载游戏地图
+    // 加载游戏地图（tile地图必须保证tmx文件跟图片资源相对目录）
     std::string map_name = "img/map/Round" + std::to_string(m_round) + ".tmx";
     TMXTiledMap* tile_map = TMXTiledMap::create(map_name);
-    tile_map->setAnchorPoint(Point::ZERO);
-    tile_map->setPosition(visible_origin);
+    tile_map->setAnchorPoint(Point(0.5, 0.5));
+    tile_map->setPosition(visible_origin.x + visible_size.width / 2,
+                          visible_origin.y + visible_size.height / 2);
     addChild(tile_map);
     
     return true;
