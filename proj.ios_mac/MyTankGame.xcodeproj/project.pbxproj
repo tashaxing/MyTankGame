@@ -48,6 +48,10 @@
 		E219B77C23059BD800409B74 /* joypad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B77B23059BD800409B74 /* joypad.cpp */; };
 		E219B78123099E6B00409B74 /* sound in Resources */ = {isa = PBXBuildFile; fileRef = E219B78023099E6B00409B74 /* sound */; };
 		E219B793230D8B3D00409B74 /* img in Resources */ = {isa = PBXBuildFile; fileRef = E219B792230D8B3D00409B74 /* img */; };
+		E219B79623123C5600409B74 /* player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79523123C5600409B74 /* player.cpp */; };
+		E219B79923123C7400409B74 /* enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79823123C7400409B74 /* enemy.cpp */; };
+		E219B79C23123CA100409B74 /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79B23123CA100409B74 /* item.cpp */; };
+		E219B79F23127C1000409B74 /* battle_field.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79E23127C1000409B74 /* battle_field.cpp */; };
 		ED545A7C1B68A1F400C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7B1B68A1F400C3958E /* libiconv.dylib */; };
 		ED545A7E1B68A1FA00C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7D1B68A1FA00C3958E /* libiconv.dylib */; };
 /* End PBXBuildFile section */
@@ -137,6 +141,14 @@
 		E219B77B23059BD800409B74 /* joypad.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = joypad.cpp; sourceTree = "<group>"; };
 		E219B78023099E6B00409B74 /* sound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = sound; sourceTree = "<group>"; };
 		E219B792230D8B3D00409B74 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
+		E219B79423123C4600409B74 /* player.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = player.h; sourceTree = "<group>"; };
+		E219B79523123C5600409B74 /* player.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = player.cpp; sourceTree = "<group>"; };
+		E219B79723123C6300409B74 /* enemy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = enemy.h; sourceTree = "<group>"; };
+		E219B79823123C7400409B74 /* enemy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = enemy.cpp; sourceTree = "<group>"; };
+		E219B79A23123C8E00409B74 /* item.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = item.h; sourceTree = "<group>"; };
+		E219B79B23123CA100409B74 /* item.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = item.cpp; sourceTree = "<group>"; };
+		E219B79D23127C0400409B74 /* battle_field.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = battle_field.h; sourceTree = "<group>"; };
+		E219B79E23127C1000409B74 /* battle_field.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = battle_field.cpp; sourceTree = "<group>"; };
 		ED545A7B1B68A1F400C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/lib/libiconv.dylib; sourceTree = DEVELOPER_DIR; };
 		ED545A7D1B68A1FA00C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -284,6 +296,14 @@
 				E219B7782305929E00409B74 /* welcome_scene.cpp */,
 				E219B77A23059BC800409B74 /* joypad.h */,
 				E219B77B23059BD800409B74 /* joypad.cpp */,
+				E219B79423123C4600409B74 /* player.h */,
+				E219B79523123C5600409B74 /* player.cpp */,
+				E219B79723123C6300409B74 /* enemy.h */,
+				E219B79823123C7400409B74 /* enemy.cpp */,
+				E219B79A23123C8E00409B74 /* item.h */,
+				E219B79B23123CA100409B74 /* item.cpp */,
+				E219B79D23127C0400409B74 /* battle_field.h */,
+				E219B79E23127C1000409B74 /* battle_field.cpp */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -437,12 +457,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E219B79623123C5600409B74 /* player.cpp in Sources */,
 				E219B77C23059BD800409B74 /* joypad.cpp in Sources */,
 				1AF87B781F6F77F7007BE51C /* AppController.mm in Sources */,
 				E219B77623058F4300409B74 /* game_scene.cpp in Sources */,
 				1AF87B8B1F6F782A007BE51C /* RootViewController.mm in Sources */,
+				E219B79923123C7400409B74 /* enemy.cpp in Sources */,
+				E219B79F23127C1000409B74 /* battle_field.cpp in Sources */,
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				1AF87B8A1F6F7822007BE51C /* main.m in Sources */,
+				E219B79C23123CA100409B74 /* item.cpp in Sources */,
 				E219B7792305929E00409B74 /* welcome_scene.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

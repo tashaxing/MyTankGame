@@ -1,7 +1,9 @@
 #include "welcome_scene.h"
 #include "game_scene.h"
+#include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 
+using namespace CocosDenshion;
 using namespace ui; // button namespace
 
 Scene* WelcomeScene::createScene()
@@ -25,6 +27,28 @@ bool WelcomeScene::init()
     background->setPosition(visible_origin.x + visible_size.width / 2,
                             visible_origin.y + visible_size.height / 2);
     addChild(background);
+    
+    // 预加载资源（暂且使用同步模式）
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("img/tank/tank.plist", "img/tank/tank.png");
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("img/item/item.plist", "img/item/item.png");
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("img/tank/blast.plist", "img/tank/blast/blast.png");
+    
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("sound/levelstarting.wav");
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("sound/gameover.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/bonus.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/brickhit.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/eexplosion.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/fexplosion.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/ice.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/life.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/moving.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/nmoving.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/pause.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/shieldhit.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/shoot.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/steelhit.wav");
+    SimpleAudioEngine::getInstance()->preloadEffect("sound/tbonushit.wav");
+    
     
     // 添加开始游戏按钮
     Button* playgame_btn = Button::create("img/menu/playgame_normal.png", "img/menu/playgame_pressed.png");
