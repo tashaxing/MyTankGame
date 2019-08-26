@@ -1,5 +1,8 @@
 #include "joypad.h"
 
+
+const double PI = 3.141592654;
+
 bool Joypad::init()
 {
     if (!Layer::init())
@@ -18,13 +21,31 @@ bool Joypad::init()
     m_stick->setPosition(m_wheel->getPosition());
     addChild(m_stick);
     
-    is_can_move = true;
+    m_can_move = true;
     
     // 开火键
-    m_attack = Sprite::create("img/joypad/attack.png");
-    m_attack->setContentSize(Size(40, 40));
-    m_attack->setPosition(visible_origin.x + visible_size.width - 70,
-                        visible_origin.y + 70);
+    m_attack = Button::create("img/joypad/attack.png");
+    m_attack->setContentSize(Size(60, 60));
+    m_attack->setPosition(Vec2(visible_origin.x + visible_size.width - 70,
+                          visible_origin.y + 70));
+    m_attack->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type){
+        // 按钮点击事件
+        switch (type)
+        {
+            case ui::Widget::TouchEventType::BEGAN:
+            {
+                // 开火
+            }
+                break;
+            case ui::Widget::TouchEventType::ENDED:
+            {
+                
+            }
+                break;
+            default:
+                break;
+        }
+    });
     addChild(m_attack);
     
     // 触摸监听
@@ -38,10 +59,23 @@ bool Joypad::init()
 }
 
 // 获取以p1为圆心，p2p1与x轴正方向的弧度值
-float Joypad::calcRad(Point pos1, Point pos2)
+float Joypad::calcRad(Point p1, Point p2)
 {
-    float rad;
+    float xx = p2.x - p1.x;
+    float yy = p2.y - p1.y;
+    
+    // 斜边
+    float xie = sqrt(pow(xx, 2) + pow(yy, 2));
+    // yy >= 0 弧度在于 0 到 π 之间。(0~180°)
+    // yy < 0 弧度在于 π 到 2π 之间。(180°~360°)
+    float rad = yy >= 0 ? (acos(xx / xie)) : (PI * 2 - acos(xx / xie));
     return rad;
+}
+
+// 得到与角度对应的半径为R的圆上一坐标点, 相对值
+Vec2 Joypad::getAnglePosition(float R, float rad)
+{
+    return Point(R * cos(rad), R * sin(rad));
 }
 
 bool Joypad::onTouchBegan(Touch *touch, Event *event)
@@ -52,7 +86,7 @@ bool Joypad::onTouchBegan(Touch *touch, Event *event)
     
     // 触点在中心圈内才能移动
     if (m_stick->getBoundingBox().containsPoint(point))
-        is_can_move = true;
+        m_can_move = true;
     
     return true;
 }
@@ -60,20 +94,34 @@ bool Joypad::onTouchBegan(Touch *touch, Event *event)
 void Joypad::onTouchMoved(Touch *touch, Event *event)
 {
     CCLOG("onTouchMoved");
-    if (!is_can_move)
+    if (!m_can_move)
         return;
     
     Point point = touch->getLocation();
     Point wheel_center = m_wheel->getPosition();
     float wheel_radius = m_wheel->getContentSize().width / 2;
+    float stick_radius = m_stick->getContentSize().width / 2;
     
     // 判断两个圆心的距离是否大于外圈半径
     float distance = sqrt(pow(point.x - wheel_center.x, 2) + pow(point.y - wheel_center.y, 2));
-    if (distance >= wheel_radius)
-        
+    if (distance >= wheel_radius - stick_radius)
+    {
+        float rad = calcRad(wheel_center, point);
+        // 摇杆不超出外圈范围
+        m_stick->setPosition(wheel_center + getAnglePosition(wheel_radius - stick_radius, rad));
+    }
+    else
+        m_stick->setPosition(point); // 摇杆跟随触点
 }
 
 void Joypad::onTouchEnded(Touch *touch, Event *event)
 {
     CCLOG("onTouchEnded");
+    
+    // 恢复到圆心
+    Point wheel_center = m_wheel->getPosition();
+    m_stick->stopAllActions();
+    m_stick->runAction(MoveTo::create(0.08, wheel_center));
+    
+    m_can_move = false;
 }
