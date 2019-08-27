@@ -11,6 +11,9 @@ bool Joypad::init()
     Point visible_origin = Director::getInstance()->getVisibleOrigin();
     Size visible_size = Director::getInstance()->getVisibleSize();
     
+	// 此处是4方向
+	m_type = KEY4;
+
     // 锚点在圆心
     // 摇杆
     m_wheel = Sprite::create("img/joypad/wheel.png");
@@ -87,6 +90,8 @@ bool Joypad::onTouchBegan(Touch *touch, Event *event)
     // 触点在中心圈内才能移动
     if (m_stick->getBoundingBox().containsPoint(point))
         m_can_move = true;
+
+	// add callback to control game
     
     return true;
 }
@@ -104,14 +109,85 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
     
     // 判断两个圆心的距离是否大于外圈半径
     float distance = sqrt(pow(point.x - wheel_center.x, 2) + pow(point.y - wheel_center.y, 2));
-    if (distance >= wheel_radius - stick_radius)
+	float rad = calcRad(wheel_center, point);
+	if (distance >= wheel_radius - stick_radius)
     {
-        float rad = calcRad(wheel_center, point);
         // 摇杆不超出外圈范围
         m_stick->setPosition(wheel_center + getAnglePosition(wheel_radius - stick_radius, rad));
     }
     else
         m_stick->setPosition(point); // 摇杆跟随触点
+
+	// 换算成角度，根据键类型确定方向
+	float angle = rad * 180.0 / PI;
+	if (m_type == KEY4)
+	{
+		if ((angle >= 0 && angle < 45) || (angle >= 315 && angle < 360))
+		{
+			//右
+			
+		}
+		if (angle >= 45 && angle < 135)
+		{ 
+			//上
+			
+		}
+		if (angle >= 135 && angle < 225)
+		{ 
+			//左
+			
+		}
+		if (angle >= 225 && angle < 315)
+		{ 
+			//下
+			
+		}
+	}
+	else if (m_type == KEY8)
+	{
+		if ((angle >= 0 && angle < 22.5) || (angle >= 337.5 && angle < 360))
+		{
+			//右
+			
+		}
+		if (angle >= 22.5 && angle < 67.5)
+		{ 
+			//右上
+			
+		}
+		if (angle >= 67.5 && angle < 112.5)
+		{ 
+			//上
+			
+		}
+		if (angle >= 112.5 && angle < 157.5)
+		{ 
+			//左上
+			
+		}
+		if (angle >= 157.5 && angle < 202.5)
+		{ 
+			//左
+			
+		}
+		if (angle >= 202.5 && angle < 247.5)
+		{ 
+			//左下
+			
+		}
+		if (angle >= 247.5 && angle < 292.5)
+		{ 
+			//下
+			
+		}
+		if (angle >= 292.5 && angle < 337.5)
+		{ 
+			//右下
+			
+		}
+	}
+
+	// add callback to control game
 }
 
 void Joypad::onTouchEnded(Touch *touch, Event *event)
@@ -124,4 +200,6 @@ void Joypad::onTouchEnded(Touch *touch, Event *event)
     m_stick->runAction(MoveTo::create(0.08, wheel_center));
     
     m_can_move = false;
+
+	// add callback to control game
 }

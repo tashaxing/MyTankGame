@@ -7,6 +7,14 @@
 using namespace cocos2d;
 using namespace ui; // button namespace
 
+// 摇杆类型，四方向、八方向、任意方向
+enum JoystickType
+{
+	KEY4,
+	KEY8,
+	KEYANY
+};
+
 // 虚拟手柄控制层
 class Joypad : public Layer
 {
@@ -19,6 +27,7 @@ public:
     virtual void onTouchEnded(Touch *touch, Event *event);
     
 private:
+	JoystickType m_type;
     float calcRad(Point p1, Point p2);
     Vec2 getAnglePosition(float R, float rad);
     Sprite* m_wheel;
