@@ -23,9 +23,14 @@ public:
     
     CREATE_FUNC(GameScene);
     
+public:
+	void onEnumDirection(MoveDirection move_direction);
+	void onAngleDirection(float angle);
+	void onFireBtn(bool is_pressed);
     int m_round = 1; // 第几关，默认第一关
-    
+
 private:
+
     BattleField* m_battle_field;
     Player* m_player1;
     Joypad* m_joypad;

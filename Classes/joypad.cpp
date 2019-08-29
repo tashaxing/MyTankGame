@@ -26,7 +26,7 @@ bool Joypad::init()
     
     m_can_move = true;
     
-    // 开火键
+    // 开火键(用按钮来做会比较精确)
     m_attack = Button::create("img/joypad/attack.png");
     m_attack->setContentSize(Size(60, 60));
     m_attack->setPosition(Vec2(visible_origin.x + visible_size.width - 70,
@@ -50,6 +50,9 @@ bool Joypad::init()
         }
     });
     addChild(m_attack);
+
+	// 初始时游戏场景未绑定
+	m_game_scene = nullptr;
     
     // 触摸监听
     auto touch_listener = EventListenerTouchOneByOne::create();
@@ -110,10 +113,10 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
     // 判断两个圆心的距离是否大于外圈半径
     float distance = sqrt(pow(point.x - wheel_center.x, 2) + pow(point.y - wheel_center.y, 2));
 	float rad = calcRad(wheel_center, point);
-	if (distance >= wheel_radius - stick_radius)
+	if (distance >= wheel_radius)
     {
-        // 摇杆不超出外圈范围
-        m_stick->setPosition(wheel_center + getAnglePosition(wheel_radius - stick_radius, rad));
+        // 摇杆中心不超出外圈范围
+        m_stick->setPosition(wheel_center + getAnglePosition(wheel_radius, rad));
     }
     else
         m_stick->setPosition(point); // 摇杆跟随触点
@@ -125,7 +128,7 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
 		if ((angle >= 0 && angle < 45) || (angle >= 315 && angle < 360))
 		{
 			//右
-			
+			// callback
 		}
 		if (angle >= 45 && angle < 135)
 		{ 
@@ -202,4 +205,9 @@ void Joypad::onTouchEnded(Touch *touch, Event *event)
     m_can_move = false;
 
 	// add callback to control game
+}
+
+void Joypad::setGameScene(GameScene* game_scene)
+{
+	m_game_scene = game_scene;
 }

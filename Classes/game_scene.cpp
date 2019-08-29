@@ -54,6 +54,7 @@ bool GameScene::init()
     
     // 加载摇杆控制
     m_joypad = Joypad::create();
+	m_joypad->setGameScene(this); // 绑定该游戏场景被摇杆控制
     addChild(m_joypad, kJoypadZorder);
     
     // 播放开场音乐
@@ -79,6 +80,21 @@ bool GameScene::init()
     level_splash->runAction(Sequence::create(DelayTime::create(1.0), move_by, NULL)); // FIXME: remove in callback
     
     return true;
+}
+
+void GameScene::onEnumDirection(MoveDirection move_direction)
+{
+
+}
+
+void GameScene::onAngleDirection(float angle)
+{
+
+}
+
+void GameScene::onFireBtn(bool is_pressed)
+{
+
 }
 
 void GameScene::update(float dt)

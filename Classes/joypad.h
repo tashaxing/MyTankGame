@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
+#include "game_scene.h"
 
 using namespace cocos2d;
 using namespace ui; // button namespace
@@ -13,6 +14,18 @@ enum JoystickType
 	KEY4,
 	KEY8,
 	KEYANY
+};
+
+enum MoveDirection
+{
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	RIGHT_UP,
+	LEFT_UP,
+	LEFT_DOWN,
+	RIGHT_DOWN
 };
 
 // 虚拟手柄控制层
@@ -26,6 +39,8 @@ public:
     virtual void onTouchMoved(Touch *touch, Event *event);
     virtual void onTouchEnded(Touch *touch, Event *event);
     
+	void setGameScene(GameScene* game_scene);
+
 private:
 	JoystickType m_type;
     float calcRad(Point p1, Point p2);
@@ -34,6 +49,8 @@ private:
     Sprite* m_stick;
     Button* m_attack;
     bool m_can_move;
+
+	GameScene* m_game_scene; // like callback
 };
 
 #endif /* _JOYPAD_H_ */
