@@ -3,7 +3,7 @@
 
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
-#include "game_scene.h"
+
 
 using namespace cocos2d;
 using namespace ui; // button namespace
@@ -16,7 +16,7 @@ enum JoystickType
 	KEYANY
 };
 
-enum MoveDirection
+enum JoyDirection
 {
 	UP,
 	DOWN,
@@ -25,8 +25,12 @@ enum MoveDirection
 	RIGHT_UP,
 	LEFT_UP,
 	LEFT_DOWN,
-	RIGHT_DOWN
+	RIGHT_DOWN,
+    NONE
 };
+
+// use pre declare instead of include to avoid compile error
+class GameScene;
 
 // 虚拟手柄控制层
 class Joypad : public Layer
@@ -39,7 +43,8 @@ public:
     virtual void onTouchMoved(Touch *touch, Event *event);
     virtual void onTouchEnded(Touch *touch, Event *event);
     
-	void setGameScene(GameScene* game_scene);
+    void setJoystickType(JoystickType joystick_type);
+    void setGameScene(GameScene* game_scene);
 
 private:
 	JoystickType m_type;
@@ -50,7 +55,9 @@ private:
     Button* m_attack;
     bool m_can_move;
 
-	GameScene* m_game_scene; // like callback
+    bool m_direction_status; // 方向键按下
+    bool m_fire_status; // 开火键按下
+    GameScene* m_game_scene = nullptr; // like callback
 };
 
 #endif /* _JOYPAD_H_ */

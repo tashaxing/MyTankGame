@@ -54,7 +54,8 @@ bool GameScene::init()
     
     // 加载摇杆控制
     m_joypad = Joypad::create();
-	m_joypad->setGameScene(this); // 绑定该游戏场景被摇杆控制
+    m_joypad->setJoystickType(KEY4); // 四个方向键位
+    m_joypad->setGameScene(this); // 绑定该游戏场景被摇杆控制
     addChild(m_joypad, kJoypadZorder);
     
     // 播放开场音乐
@@ -82,19 +83,19 @@ bool GameScene::init()
     return true;
 }
 
-void GameScene::onEnumDirection(MoveDirection move_direction)
+void GameScene::onEnumDirection(JoyDirection direction)
 {
-
+    CCLOG("GameScene onEnumDirection: %d", direction);
 }
 
 void GameScene::onAngleDirection(float angle)
 {
-
+    CCLOG("GameScene onAngleDirection: %f", angle);
 }
 
 void GameScene::onFireBtn(bool is_pressed)
 {
-
+    CCLOG("GameScene onFireBtn: %s", is_pressed ? "yes" : "no");
 }
 
 void GameScene::update(float dt)

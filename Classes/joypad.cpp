@@ -1,5 +1,5 @@
 #include "joypad.h"
-
+#include "game_scene.h"
 
 const double PI = 3.141592654;
 
@@ -26,7 +26,7 @@ bool Joypad::init()
     
     m_can_move = true;
     
-    // 开火键(用按钮来做会比较精确)
+    // 开火键(用按钮来做会比较精确,其实也可以用精灵在触摸的回调里面做)
     m_attack = Button::create("img/joypad/attack.png");
     m_attack->setContentSize(Size(60, 60));
     m_attack->setPosition(Vec2(visible_origin.x + visible_size.width - 70,
@@ -38,11 +38,17 @@ bool Joypad::init()
             case ui::Widget::TouchEventType::BEGAN:
             {
                 // 开火
+                // callback
+                if (m_game_scene)
+                    m_game_scene->onFireBtn(true);
             }
                 break;
             case ui::Widget::TouchEventType::ENDED:
             {
-                
+                // 停止开火
+                // callback
+                if (m_game_scene)
+                    m_game_scene->onFireBtn(false);
             }
                 break;
             default:
@@ -50,9 +56,6 @@ bool Joypad::init()
         }
     });
     addChild(m_attack);
-
-	// 初始时游戏场景未绑定
-	m_game_scene = nullptr;
     
     // 触摸监听
     auto touch_listener = EventListenerTouchOneByOne::create();
@@ -62,6 +65,11 @@ bool Joypad::init()
     _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
     
     return true;
+}
+
+void Joypad::setJoystickType(JoystickType joystick_type)
+{
+    m_type = joystick_type;
 }
 
 // 获取以p1为圆心，p2p1与x轴正方向的弧度值
@@ -93,8 +101,6 @@ bool Joypad::onTouchBegan(Touch *touch, Event *event)
     // 触点在中心圈内才能移动
     if (m_stick->getBoundingBox().containsPoint(point))
         m_can_move = true;
-
-	// add callback to control game
     
     return true;
 }
@@ -121,76 +127,56 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
     else
         m_stick->setPosition(point); // 摇杆跟随触点
 
-	// 换算成角度，根据键类型确定方向
+	// 换算成角度，根据键类型确定方向，将方向控制信号传给游戏场景
 	float angle = rad * 180.0 / PI;
 	if (m_type == KEY4)
 	{
+        JoyDirection direction;
+        // 靠近轴90度范围
 		if ((angle >= 0 && angle < 45) || (angle >= 315 && angle < 360))
-		{
-			//右
-			// callback
-		}
-		if (angle >= 45 && angle < 135)
-		{ 
-			//上
-			
-		}
-		if (angle >= 135 && angle < 225)
-		{ 
-			//左
-			
-		}
-		if (angle >= 225 && angle < 315)
-		{ 
-			//下
-			
-		}
+            direction = RIGHT;  // 右
+		else if (angle >= 45 && angle < 135)
+            direction = UP;    // 上
+		else if (angle >= 135 && angle < 225)
+            direction = LEFT;  // 左
+		else if (angle >= 225 && angle < 315)
+            direction = DOWN;  // 下
+        
+        // callback
+        if (m_game_scene)
+            m_game_scene->onEnumDirection(direction);
 	}
 	else if (m_type == KEY8)
 	{
+        JoyDirection direction;
+        // 靠近轴45度范围
 		if ((angle >= 0 && angle < 22.5) || (angle >= 337.5 && angle < 360))
-		{
-			//右
-			
-		}
-		if (angle >= 22.5 && angle < 67.5)
-		{ 
-			//右上
-			
-		}
-		if (angle >= 67.5 && angle < 112.5)
-		{ 
-			//上
-			
-		}
-		if (angle >= 112.5 && angle < 157.5)
-		{ 
-			//左上
-			
-		}
-		if (angle >= 157.5 && angle < 202.5)
-		{ 
-			//左
-			
-		}
-		if (angle >= 202.5 && angle < 247.5)
-		{ 
-			//左下
-			
-		}
-		if (angle >= 247.5 && angle < 292.5)
-		{ 
-			//下
-			
-		}
-		if (angle >= 292.5 && angle < 337.5)
-		{ 
-			//右下
-			
-		}
+            direction = RIGHT; // 右
+		else if (angle >= 22.5 && angle < 67.5)
+            direction = RIGHT_UP; // 右上
+		else if (angle >= 67.5 && angle < 112.5)
+            direction = UP; // 上
+		else if (angle >= 112.5 && angle < 157.5)
+            direction = LEFT_UP; // 左上
+		else if (angle >= 157.5 && angle < 202.5)
+            direction = LEFT; // 左
+		else if (angle >= 202.5 && angle < 247.5)
+            direction = LEFT_DOWN; // 左下
+		else if (angle >= 247.5 && angle < 292.5)
+            direction = DOWN; // 下
+		else if (angle >= 292.5 && angle < 337.5)
+            direction = RIGHT_DOWN; // 右下
+        
+        // callback
+        if (m_game_scene)
+            m_game_scene->onEnumDirection(direction);
 	}
-
-	// add callback to control game
+    else if (m_type == KEYANY)
+    {
+        // callback
+        if (m_game_scene)
+            m_game_scene->onAngleDirection(angle);
+    }
 }
 
 void Joypad::onTouchEnded(Touch *touch, Event *event)
@@ -204,10 +190,23 @@ void Joypad::onTouchEnded(Touch *touch, Event *event)
     
     m_can_move = false;
 
-	// add callback to control game
+    // 停止对游戏场景的控制
+	// callback
+    if (m_type == KEY4 || m_type == KEY8)
+    {
+        if (m_game_scene)
+            m_game_scene->onEnumDirection(NONE);
+    }
+    else if (m_type == KEYANY)
+    {
+        if (m_game_scene)
+        {
+            m_game_scene->onAngleDirection(0.0);
+        }
+    }
 }
 
 void Joypad::setGameScene(GameScene* game_scene)
 {
-	m_game_scene = game_scene;
+    m_game_scene = game_scene;
 }

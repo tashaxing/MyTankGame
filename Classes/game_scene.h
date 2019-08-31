@@ -24,8 +24,8 @@ public:
     CREATE_FUNC(GameScene);
     
 public:
-	void onEnumDirection(MoveDirection move_direction);
-	void onAngleDirection(float angle);
+	void onEnumDirection(JoyDirection direction); // 控制摇杆方向回调，枚举值
+	void onAngleDirection(float angle); // 控制摇杆方向回调，任意角度
 	void onFireBtn(bool is_pressed);
     int m_round = 1; // 第几关，默认第一关
 
