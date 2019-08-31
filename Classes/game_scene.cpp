@@ -43,7 +43,7 @@ bool GameScene::init()
     // 加载玩家坦克
     m_player1 = Player::create();
     m_player1->initWithType(P1);
-    m_player1->setContentSize(tile_size); // should fit tile size
+    m_player1->setSize(tile_size * 0.9); // should fit tile size
     m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 2,
                            m_battle_field->getPositionY() + tile_size.height / 2);
     addChild(m_player1, kMapZorder);
@@ -86,16 +86,50 @@ bool GameScene::init()
 void GameScene::onEnumDirection(JoyDirection direction)
 {
     CCLOG("GameScene onEnumDirection: %d", direction);
+    
+    static JoyDirection pre_direction = NONE;
+    // 只有方向改变时才给玩家坦克发控制指令
+    if (direction != pre_direction)
+    {
+        m_player1->setMoveDirection(direction);
+        pre_direction = direction;
+    }
 }
 
 void GameScene::onAngleDirection(float angle)
 {
     CCLOG("GameScene onAngleDirection: %f", angle);
+    // no need in this function
 }
 
 void GameScene::onFireBtn(bool is_pressed)
 {
     CCLOG("GameScene onFireBtn: %s", is_pressed ? "yes" : "no");
+    
+    static bool pre_press_status = false;
+    if (is_pressed != pre_press_status)
+    {
+        // 调度子弹，同时考虑单发和i连发
+        if (is_pressed)
+        {
+            // TODO: every moment make sure only limit number bullet in the screen
+            // FIXME: timer would wait at least one delay interval, here shoot a bullet at one
+            Bullet* bullet = m_player1->shootSingle();
+            addChild(bullet, kMapZorder);
+            
+            schedule(schedule_selector(GameScene::emitPlayerBullet), m_player1->m_bullet_interval);
+        }
+        else
+            unschedule(schedule_selector(GameScene::emitPlayerBullet));
+            
+        pre_press_status = is_pressed;
+    }
+}
+
+void GameScene::emitPlayerBullet(float tm)
+{
+    Bullet* bullet = m_player1->shootSingle();
+    addChild(bullet, kMapZorder);
 }
 
 void GameScene::update(float dt)

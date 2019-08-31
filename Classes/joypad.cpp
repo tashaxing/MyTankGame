@@ -28,7 +28,7 @@ bool Joypad::init()
     
     // 开火键(用按钮来做会比较精确,其实也可以用精灵在触摸的回调里面做)
     m_attack = Button::create("img/joypad/attack.png");
-    m_attack->setContentSize(Size(60, 60));
+    m_attack->setScale(1.5);
     m_attack->setPosition(Vec2(visible_origin.x + visible_size.width - 70,
                           visible_origin.y + 70));
     m_attack->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type){
@@ -98,8 +98,8 @@ bool Joypad::onTouchBegan(Touch *touch, Event *event)
     
     Point point = touch->getLocation();
     
-    // 触点在中心圈内才能移动
-    if (m_stick->getBoundingBox().containsPoint(point))
+    // 触点在圈内才能移动
+    if (m_wheel->getBoundingBox().containsPoint(point))
         m_can_move = true;
     
     return true;
@@ -131,16 +131,22 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
 	float angle = rad * 180.0 / PI;
 	if (m_type == KEY4)
 	{
+        // 加入控制死区，只有圆心偏移距离够长才换方向
         JoyDirection direction;
-        // 靠近轴90度范围
-		if ((angle >= 0 && angle < 45) || (angle >= 315 && angle < 360))
-            direction = RIGHT;  // 右
-		else if (angle >= 45 && angle < 135)
-            direction = UP;    // 上
-		else if (angle >= 135 && angle < 225)
-            direction = LEFT;  // 左
-		else if (angle >= 225 && angle < 315)
-            direction = DOWN;  // 下
+        if (distance >= wheel_radius / 5)
+        {
+            // 靠近轴90度范围
+            if ((angle >= 0 && angle < 45) || (angle >= 315 && angle < 360))
+                direction = RIGHT;  // 右
+            else if (angle >= 45 && angle < 135)
+                direction = UP;    // 上
+            else if (angle >= 135 && angle < 225)
+                direction = LEFT;  // 左
+            else if (angle >= 225 && angle < 315)
+                direction = DOWN;  // 下
+        }
+        else
+            direction = NONE;
         
         // callback
         if (m_game_scene)
@@ -148,24 +154,30 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
 	}
 	else if (m_type == KEY8)
 	{
+        // 加入控制死区，只有圆心偏移距离够长才换方向
         JoyDirection direction;
-        // 靠近轴45度范围
-		if ((angle >= 0 && angle < 22.5) || (angle >= 337.5 && angle < 360))
-            direction = RIGHT; // 右
-		else if (angle >= 22.5 && angle < 67.5)
-            direction = RIGHT_UP; // 右上
-		else if (angle >= 67.5 && angle < 112.5)
-            direction = UP; // 上
-		else if (angle >= 112.5 && angle < 157.5)
-            direction = LEFT_UP; // 左上
-		else if (angle >= 157.5 && angle < 202.5)
-            direction = LEFT; // 左
-		else if (angle >= 202.5 && angle < 247.5)
-            direction = LEFT_DOWN; // 左下
-		else if (angle >= 247.5 && angle < 292.5)
-            direction = DOWN; // 下
-		else if (angle >= 292.5 && angle < 337.5)
-            direction = RIGHT_DOWN; // 右下
+        if (distance >= wheel_radius / 5)
+        {
+            // 靠近轴45度范围
+            if ((angle >= 0 && angle < 22.5) || (angle >= 337.5 && angle < 360))
+                direction = RIGHT; // 右
+            else if (angle >= 22.5 && angle < 67.5)
+                direction = RIGHT_UP; // 右上
+            else if (angle >= 67.5 && angle < 112.5)
+                direction = UP; // 上
+            else if (angle >= 112.5 && angle < 157.5)
+                direction = LEFT_UP; // 左上
+            else if (angle >= 157.5 && angle < 202.5)
+                direction = LEFT; // 左
+            else if (angle >= 202.5 && angle < 247.5)
+                direction = LEFT_DOWN; // 左下
+            else if (angle >= 247.5 && angle < 292.5)
+                direction = DOWN; // 下
+            else if (angle >= 292.5 && angle < 337.5)
+                direction = RIGHT_DOWN; // 右下
+        }
+        else
+            direction = NONE;
         
         // callback
         if (m_game_scene)

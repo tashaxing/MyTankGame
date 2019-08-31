@@ -52,6 +52,7 @@
 		E219B79923123C7400409B74 /* enemy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79823123C7400409B74 /* enemy.cpp */; };
 		E219B79C23123CA100409B74 /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79B23123CA100409B74 /* item.cpp */; };
 		E219B79F23127C1000409B74 /* battle_field.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B79E23127C1000409B74 /* battle_field.cpp */; };
+		E219B7A2231AB0BA00409B74 /* bullet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E219B7A0231AB0B900409B74 /* bullet.cpp */; };
 		ED545A7C1B68A1F400C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7B1B68A1F400C3958E /* libiconv.dylib */; };
 		ED545A7E1B68A1FA00C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7D1B68A1FA00C3958E /* libiconv.dylib */; };
 /* End PBXBuildFile section */
@@ -149,6 +150,8 @@
 		E219B79B23123CA100409B74 /* item.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = item.cpp; sourceTree = "<group>"; };
 		E219B79D23127C0400409B74 /* battle_field.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = battle_field.h; sourceTree = "<group>"; };
 		E219B79E23127C1000409B74 /* battle_field.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = battle_field.cpp; sourceTree = "<group>"; };
+		E219B7A0231AB0B900409B74 /* bullet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bullet.cpp; sourceTree = "<group>"; };
+		E219B7A1231AB0B900409B74 /* bullet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bullet.h; sourceTree = "<group>"; };
 		ED545A7B1B68A1F400C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/lib/libiconv.dylib; sourceTree = DEVELOPER_DIR; };
 		ED545A7D1B68A1FA00C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -296,6 +299,8 @@
 				E219B7782305929E00409B74 /* welcome_scene.cpp */,
 				E219B77A23059BC800409B74 /* joypad.h */,
 				E219B77B23059BD800409B74 /* joypad.cpp */,
+				E219B7A0231AB0B900409B74 /* bullet.cpp */,
+				E219B7A1231AB0B900409B74 /* bullet.h */,
 				E219B79423123C4600409B74 /* player.h */,
 				E219B79523123C5600409B74 /* player.cpp */,
 				E219B79723123C6300409B74 /* enemy.h */,
@@ -464,6 +469,7 @@
 				1AF87B8B1F6F782A007BE51C /* RootViewController.mm in Sources */,
 				E219B79923123C7400409B74 /* enemy.cpp in Sources */,
 				E219B79F23127C1000409B74 /* battle_field.cpp in Sources */,
+				E219B7A2231AB0BA00409B74 /* bullet.cpp in Sources */,
 				46880B8819C43A87006E1F66 /* AppDelegate.cpp in Sources */,
 				1AF87B8A1F6F7822007BE51C /* main.m in Sources */,
 				E219B79C23123CA100409B74 /* item.cpp in Sources */,

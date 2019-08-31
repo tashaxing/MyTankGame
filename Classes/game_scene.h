@@ -30,7 +30,11 @@ public:
     int m_round = 1; // 第几关，默认第一关
 
 private:
-
+    void emitPlayerBullet(float tm);
+    Vector<Bullet*> m_player_bullets;
+    
+    void generateEnemey();
+    
     BattleField* m_battle_field;
     Player* m_player1;
     Joypad* m_joypad;
