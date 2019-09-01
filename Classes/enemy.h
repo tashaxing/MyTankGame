@@ -2,6 +2,9 @@
 #define _ENEMY_H_
 
 #include "cocos2d.h"
+#include "bullet.h"
+#include "joypad.h"
+
 USING_NS_CC;
 
 enum EnemyType
@@ -21,8 +24,9 @@ public:
     void resumeAll();
     
     void initWithType(EnemyType enemy_type);
+    void setSize(Size size);
     void move(float tm);
-    void shoot();
+    Bullet* shoot();
     void hit(int reduce_hp);
     void die();
     
@@ -30,7 +34,10 @@ public:
     EnemyType m_type;
     
 private:
+    Size m_size;
     float m_speed;
+    JoyDirection m_head_direction;
+    JoyDirection m_move_direction; // 坦克行进方向
 };
 
 #endif /* _ENEMY_H_ */

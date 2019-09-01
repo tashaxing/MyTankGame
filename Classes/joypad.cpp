@@ -94,7 +94,7 @@ Vec2 Joypad::getAnglePosition(float R, float rad)
 
 bool Joypad::onTouchBegan(Touch *touch, Event *event)
 {
-    CCLOG("onTouchBegan");
+//    CCLOG("onTouchBegan");
     
     Point point = touch->getLocation();
     
@@ -107,7 +107,8 @@ bool Joypad::onTouchBegan(Touch *touch, Event *event)
 
 void Joypad::onTouchMoved(Touch *touch, Event *event)
 {
-    CCLOG("onTouchMoved");
+//    CCLOG("onTouchMoved");
+    
     if (!m_can_move)
         return;
     
@@ -193,7 +194,7 @@ void Joypad::onTouchMoved(Touch *touch, Event *event)
 
 void Joypad::onTouchEnded(Touch *touch, Event *event)
 {
-    CCLOG("onTouchEnded");
+//    CCLOG("onTouchEnded");
     
     // 恢复到圆心
     Point wheel_center = m_wheel->getPosition();

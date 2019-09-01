@@ -10,8 +10,14 @@ USING_NS_CC;
 
 enum PlayerType
 {
-    P1,
-    P2
+    P1, // 玩家1
+    P2  // 玩家2
+};
+
+enum PlayerStatus
+{
+    SIMPLE, // 普通
+    SHIELD  // 无敌
 };
 
 class Player : public Sprite
@@ -32,11 +38,14 @@ public:
 public:
     void setSize(Size size);
     void setMoveDirection(JoyDirection direction);
+    JoyDirection m_head_direction; // 坦克朝向
     float m_bullet_interval;
+    bool m_move_enable;
     
 private:
     Size m_size;
-    JoyDirection m_head_direction; // 坦克朝向
+    PlayerStatus m_status;
+    
     JoyDirection m_move_direction; // 坦克行进方向
     BulletType m_bullet_type; // 根据子弹类型改变子弹
 };

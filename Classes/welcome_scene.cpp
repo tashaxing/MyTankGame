@@ -49,6 +49,11 @@ bool WelcomeScene::init()
     SimpleAudioEngine::getInstance()->preloadEffect("sound/steelhit.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/tbonushit.wav");
     
+    Animation* player_born_animation = Animation::create();
+    player_born_animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("shield1.png"));
+    player_born_animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("shield2.png"));
+    player_born_animation->setDelayPerUnit(0.2);
+    AnimationCache::getInstance()->addAnimation(player_born_animation, "player_born_animation");
     
     // 添加开始游戏按钮
     Button* playgame_btn = Button::create("img/menu/playgame_normal.png", "img/menu/playgame_pressed.png");

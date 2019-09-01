@@ -33,6 +33,8 @@ private:
     void emitPlayerBullet(float tm);
     Vector<Bullet*> m_player_bullets;
     
+    Vector<Enemy*> m_enemies;
+    Vector<Bullet*> m_enemy_bullets;
     void generateEnemey();
     
     BattleField* m_battle_field;

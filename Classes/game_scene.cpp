@@ -8,6 +8,8 @@ const int kItemZorder = 1;
 const int kJoypadZorder = 3;
 const int kLevelSplashZorder = 5;
 
+const float kTankSizeFactor = 0.8;
+
 Scene* GameScene::createScene()
 {
     Scene *game_scene = Scene::create();
@@ -43,14 +45,18 @@ bool GameScene::init()
     // 加载玩家坦克
     m_player1 = Player::create();
     m_player1->initWithType(P1);
-    m_player1->setSize(tile_size * 0.9); // should fit tile size
+    m_player1->setSize(tile_size * kTankSizeFactor); // should fit tile size
     m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 2,
                            m_battle_field->getPositionY() + tile_size.height / 2);
     addChild(m_player1, kMapZorder);
     
-    m_battle_field->isCollide(m_player1->getBoundingBox());
-    
     // 加载敌方坦克
+    Enemy* enemy = Enemy::create();
+    enemy->initWithType(NORMAL);
+    enemy->setSize(tile_size * kTankSizeFactor);
+    enemy->setPosition(m_battle_field->getPositionX() + tile_size.width / 2,
+                       m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
+    addChild(enemy, kMapZorder);
     
     // 加载摇杆控制
     m_joypad = Joypad::create();
@@ -80,12 +86,15 @@ bool GameScene::init()
     auto move_by = MoveBy::create(0.3, Vec2(0, visible_size.height));
     level_splash->runAction(Sequence::create(DelayTime::create(1.0), move_by, NULL)); // FIXME: remove in callback
     
+    // 默认渲染更新
+    scheduleUpdate();
+    
     return true;
 }
 
 void GameScene::onEnumDirection(JoyDirection direction)
 {
-    CCLOG("GameScene onEnumDirection: %d", direction);
+//    CCLOG("GameScene onEnumDirection: %d", direction);
     
     static JoyDirection pre_direction = NONE;
     // 只有方向改变时才给玩家坦克发控制指令
@@ -98,13 +107,13 @@ void GameScene::onEnumDirection(JoyDirection direction)
 
 void GameScene::onAngleDirection(float angle)
 {
-    CCLOG("GameScene onAngleDirection: %f", angle);
-    // no need in this function
+//    CCLOG("GameScene onAngleDirection: %f", angle);
+    // no need in this game
 }
 
 void GameScene::onFireBtn(bool is_pressed)
 {
-    CCLOG("GameScene onFireBtn: %s", is_pressed ? "yes" : "no");
+//    CCLOG("GameScene onFireBtn: %s", is_pressed ? "yes" : "no");
     
     static bool pre_press_status = false;
     if (is_pressed != pre_press_status)
@@ -132,19 +141,43 @@ void GameScene::emitPlayerBullet(float tm)
     addChild(bullet, kMapZorder);
 }
 
+void GameScene::generateEnemey()
+{
+    // 在适当时候生成敌方坦克
+    
+    // 随机改变方向，一直移动中
+}
+
 void GameScene::update(float dt)
 {
+//    CCLOG("update delta: %f", dt);
     
+    // --- 碰撞检测 ---
+    // 玩家移动障碍
+    if (m_battle_field->isCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
+    {
+        CCLOG("player can not move");
+        m_player1->m_move_enable = false;
+    }
+    else
+    {
+        CCLOG("player can move");
+        m_player1->m_move_enable = true;
+    }
+    
+    
+    
+    // --- 场景管理 ---
 }
 
 void GameScene::onEnter()
 {
     Layer::onEnter();
-    CCLOG("GameScene onEnter");
+//    CCLOG("GameScene onEnter");
 }
 
 void GameScene::onExit()
 {
     Layer::onExit();
-    CCLOG("GameScene onExit");
+//    CCLOG("GameScene onExit");
 }

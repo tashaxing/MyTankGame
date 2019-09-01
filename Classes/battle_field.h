@@ -2,6 +2,8 @@
 #define _BATTLE_FIELD_H_
 
 #include "cocos2d.h"
+#include "joypad.h"
+
 using namespace cocos2d;
 
 enum TileType
@@ -23,7 +25,8 @@ public:
     
     CREATE_FUNC(BattleField);
     
-    bool isCollide(Rect bounding_box);
+    bool isCollide(Rect bounding_box); // 简单的碰撞
+    bool isCollide(Rect bounding_box, JoyDirection direction); // 带方向的碰撞
 };
 
 #endif /* _BATTLE_FIELD_H_ */
