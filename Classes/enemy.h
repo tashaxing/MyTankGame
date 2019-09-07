@@ -20,11 +20,13 @@ public:
     virtual bool init();
     
     CREATE_FUNC(Enemy);
-    void pauseAll();
-    void resumeAll();
     
     void initWithType(EnemyType enemy_type);
     void setSize(Size size);
+    
+public:
+    void setMoveDirection(JoyDirection direction);
+    JoyDirection m_head_direction;
     void move(float tm);
     Bullet* shoot();
     void hit(int reduce_hp);
@@ -36,7 +38,7 @@ public:
 private:
     Size m_size;
     float m_speed;
-    JoyDirection m_head_direction;
+    
     JoyDirection m_move_direction; // 坦克行进方向
 };
 

@@ -35,7 +35,7 @@ private:
     
     Vector<Enemy*> m_enemies;
     Vector<Bullet*> m_enemy_bullets;
-    void generateEnemey();
+    void generateEnemy();
     
     BattleField* m_battle_field;
     Player* m_player1;

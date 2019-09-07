@@ -3,10 +3,13 @@
 
 using namespace CocosDenshion;
 
+// 全局定义
 const int kMapZorder = 0;
 const int kItemZorder = 1;
 const int kJoypadZorder = 3;
 const int kLevelSplashZorder = 5;
+
+const float kBulletGenerateInterval = 2.0;
 
 const float kTankSizeFactor = 0.8;
 
@@ -50,13 +53,9 @@ bool GameScene::init()
                            m_battle_field->getPositionY() + tile_size.height / 2);
     addChild(m_player1, kMapZorder);
     
-    // 加载敌方坦克
-    Enemy* enemy = Enemy::create();
-    enemy->initWithType(NORMAL);
-    enemy->setSize(tile_size * kTankSizeFactor);
-    enemy->setPosition(m_battle_field->getPositionX() + tile_size.width / 2,
-                       m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
-    addChild(enemy, kMapZorder);
+    // 加载敌方坦克, 每批增加六个
+    for (int i = 0; i < 6; i++)
+        generateEnemy();
     
     // 加载摇杆控制
     m_joypad = Joypad::create();
@@ -141,11 +140,50 @@ void GameScene::emitPlayerBullet(float tm)
     addChild(bullet, kMapZorder);
 }
 
-void GameScene::generateEnemey()
+void GameScene::generateEnemy()
 {
-    // 在适当时候生成敌方坦克
+    Size tile_size = m_battle_field->getTileSize();
+    Size map_array = m_battle_field->getMapSize();
+    Size map_size = m_battle_field->getContentSize();
+    
+    // 根据概率生成敌方坦克
+    float tank_type_factor = CCRANDOM_0_1();
+    EnemyType enemy_type;
+    if (tank_type_factor < 0.6)
+        enemy_type = NORMAL;
+    else if (tank_type_factor >= 0.6 && tank_type_factor < 0.9)
+        enemy_type = ARMOR;
+    else
+        enemy_type = SPEED;
+    
+    Enemy* enemy = Enemy::create();
+    enemy->initWithType(enemy_type);
+    enemy->setSize(tile_size * kTankSizeFactor);
+    
+    // 随机生成位置，顶部三个空位
+    float tank_pos_factor = CCRANDOM_0_1();
+    if (tank_pos_factor <= 1.0 / 3)
+        enemy->setPosition(m_battle_field->getPositionX() + tile_size.width / 2,
+                           m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
+    else if (tank_pos_factor >= 1.0 / 3 && tank_pos_factor < 2.0 / 3)
+        enemy->setPosition(m_battle_field->getPositionX() + map_size.width / 2,
+                           m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
+    else
+        enemy->setPosition(m_battle_field->getPositionX() + tile_size.width - tile_size.width / 2,
+                           m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
     
     // 随机改变方向，一直移动中
+    float tank_direction_factor = CCRANDOM_0_1();
+    if (tank_direction_factor < 0.25)
+        enemy->setMoveDirection(UP);
+    else if (tank_direction_factor >= 0.25 && tank_direction_factor < 0.5)
+        enemy->setMoveDirection(DOWN);
+    else if (tank_direction_factor >= 0.5 && tank_direction_factor < 0.75)
+        enemy->setMoveDirection(LEFT);
+    else
+        enemy->setMoveDirection(RIGHT);
+    
+    addChild(enemy, kMapZorder);
 }
 
 void GameScene::update(float dt)
