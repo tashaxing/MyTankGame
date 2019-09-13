@@ -1,7 +1,8 @@
 #include "battle_field.h"
 
+// tmx地图方块gid与方块类型的映射
 const TileType kTileHash[] = {
-    BLANK,
+    BLANK, // must keep the 0-th as BLANK
     BLANK, BLANK, GRASS, GRASS, STEEL, STEEL,
     BLANK, BLANK, GRASS, GRASS, STEEL, STEEL,
     WALL, WALL, RIVER, RIVER, EAGLE, EAGLE,
@@ -26,7 +27,17 @@ void BattleField::initWithLevel(int round)
     // 加载游戏地图（tile地图必须保证tmx文件跟图片资源相对目录）
     std::string map_name = "img/map/Round" + std::to_string(round) + ".tmx";
     initWithTMXFile(map_name);
-    //    tile_map->setScale(kScaleFactor); // this works
+    //    tile_map->setScale(kScaleFactor); // this works to make map looks bigger
+    
+    // print map info
+    Size map_size = getContentSize();
+    Size map_array = getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+    
+    CCLOG("tile size, width %f, height %f", tile_size.width, tile_size.height);
+    CCLOG("map array, row %f, col %f", map_array.height, map_array.width);
+    CCLOG("map size, width %f, height %f", map_size.width, map_size.height);
     
     // 画外框线，局部坐标系，以左下角为原点
     DrawNode* map_frame = DrawNode::create();
@@ -44,92 +55,190 @@ void BattleField::initWithLevel(int round)
                           visible_origin.y + visible_size.height / 2 - getContentSize().height / 2);
 }
 
-bool BattleField::isCollide(Rect bounding_box)
+bool BattleField::isBulletCollide(Rect bounding_box, BulletType bullet_type)
 {
     // 这里的包围盒坐标要转换成相对地图左下角原点的坐标
     bounding_box = Rect(bounding_box.origin.x - getPositionX(), bounding_box.origin.y - getPositionY(),
                         bounding_box.size.width, bounding_box.size.height);
     
     Size map_size = getContentSize();
-    Size tile_size = getTileSize();
+    Size map_array = getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
     
     // 不能出界
     if (bounding_box.getMinX() <= 0.1 || bounding_box.getMaxX() >= map_size.width - 0.1
         || bounding_box.getMinY() <= 0.1 || bounding_box.getMaxY() >= map_size.height - 0.1)
+    {
+        CCLOG("bullet hit border");
         return true;
+    }
     
     TMXLayer* layer0 = getLayer("layer_0");
 //    TMXLayer* layer1 = getLayer("layer_1");
     
     // 根据包围盒四个角的坐标判断gid对应的tile类别
-    int left_down_gid = layer0->getTileGIDAt(Vec2(int(bounding_box.getMinX() / tile_size.width),
-                                                  int(bounding_box.getMinY() / tile_size.height)));
-    int left_up_gid = layer0->getTileGIDAt(Vec2(int(bounding_box.getMinX() / tile_size.width),
-                                                int(bounding_box.getMaxY() / tile_size.height)));
-    int right_down_gid = layer0->getTileGIDAt(Vec2(int(bounding_box.getMaxX() / tile_size.width),
-                                                   int(bounding_box.getMinY() / tile_size.height)));
-    int right_up_gid = layer0->getTileGIDAt(Vec2((int)bounding_box.getMaxX() / tile_size.width,
-                                                 int(bounding_box.getMaxY() / tile_size.height)));
+    // tmx地图从左上角算(0, 0)原点，要做坐标转换
+    float MinX = bounding_box.getMinX();
+    float MaxX = bounding_box.getMaxX();
+    float MinY = map_size.height - bounding_box.getMinY();
+    float MaxY = map_size.height - bounding_box.getMaxY();
     
-    CCLOG("gid left_down: %d, left_up: %d, right_down: %d, right_up: %d",
-          kTileHash[left_down_gid], kTileHash[left_up_gid], kTileHash[right_down_gid], kTileHash[right_up_gid]);
+    // 小幅度修正一下边界值，避免地图标号超范围
+    if (MinY >= map_size.height)
+        MinY -= 0.1;
     
-    // 若有一个定点所在范围不是空白或草坪就算碰撞（其实如果考虑有船过水的话要复杂一些）
-    if (kTileHash[left_down_gid] != BLANK && kTileHash[left_down_gid] != GRASS
-        || kTileHash[left_up_gid] != BLANK && kTileHash[left_up_gid] != GRASS
-        || kTileHash[right_down_gid] != BLANK && kTileHash[right_down_gid] != GRASS
-        || kTileHash[right_up_gid] != BLANK && kTileHash[right_up_gid] != GRASS)
-        return true;
+    int left_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                  int(MinY / tile_size.height)));
+    int left_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                int(MaxY / tile_size.height)));
+    int right_down_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
+                                                   int(MinY / tile_size.height)));
+    int right_up_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
+                                                 int(MaxY / tile_size.height)));
+
+    // 子弹击中，消除对应的砖块
+    // 普通子弹只能打土砖
+    if (bullet_type == BASE)
+    {
+        if (kTileHash[left_down_gid] == WALL)
+        {
+            layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
+                                      int(MinY / tile_size.height)));
+            return true;
+        }
+        
+        if (kTileHash[left_up_gid] == WALL)
+        {
+            layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
+                                      int(MaxY / tile_size.height)));
+            return true;
+        }
+            
+        if (kTileHash[right_down_gid] == WALL)
+        {
+            layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
+                                      int(MinY / tile_size.height)));
+            return true;
+        }
+            
+        if (kTileHash[right_up_gid] == WALL)
+        {
+            layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
+                                      int(MaxY / tile_size.height)));
+            return true;
+        }
+    }
+    // 火力子弹可以打钢板
+    if (bullet_type == POWER)
+    {
+        if (kTileHash[left_down_gid] == WALL || kTileHash[left_down_gid] == STEEL)
+        {
+            layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
+                                      int(MinY / tile_size.height)));
+            return true;
+        }
+        
+        if (kTileHash[left_up_gid] == WALL || kTileHash[left_up_gid] == STEEL)
+        {
+            layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
+                                      int(MaxY / tile_size.height)));
+            return true;
+        }
+        
+        if (kTileHash[right_down_gid] == WALL || kTileHash[right_down_gid] == STEEL)
+        {
+            layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
+                                      int(MinY / tile_size.height)));
+            return true;
+        }
+        
+        if (kTileHash[right_up_gid] == WALL || kTileHash[right_up_gid] == STEEL)
+        {
+            layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
+                                      int(MaxY / tile_size.height)));
+            return true;
+        }
+    }
     
     return false;
 }
 
-bool BattleField::isCollide(Rect bounding_box, JoyDirection direction)
+bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
 {
-    // 这里的包围盒坐标要转换成相对地图左下角原点的坐标
+    // 这里的包围盒坐标要转换成相对地图左下角原点的坐标，包围盒本身也是左下角为原点
     bounding_box = Rect(bounding_box.origin.x - getPositionX(), bounding_box.origin.y - getPositionY(),
                         bounding_box.size.width, bounding_box.size.height);
     
     Size map_size = getContentSize();
-    Size tile_size = getTileSize();
+    Size map_array = getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
     
     // 不能出界
     if (bounding_box.getMinX() <= 0.1 && direction == LEFT
         || bounding_box.getMaxX() >= map_size.width - 0.1 && direction == RIGHT
         || bounding_box.getMinY() <= 0.1 && direction == DOWN
         || bounding_box.getMaxY() >= map_size.height - 0.1 && direction == UP)
+    {
+        CCLOG("nearly out of border");
         return true;
+    }
     
     TMXLayer* layer0 = getLayer("layer_0");
     //    TMXLayer* layer1 = getLayer("layer_1");
     
     // 根据包围盒四个角的行列坐标判断gid对应的tile类别
-    int left_down_gid = layer0->getTileGIDAt(Vec2(int(bounding_box.getMinX() / tile_size.width),
-                                                  int(bounding_box.getMinY() / tile_size.height)));
-    int left_up_gid = layer0->getTileGIDAt(Vec2(int(bounding_box.getMinX() / tile_size.width),
-                                                int(bounding_box.getMaxY() / tile_size.height)));
-    int right_down_gid = layer0->getTileGIDAt(Vec2(int(bounding_box.getMaxX() / tile_size.width),
-                                                   int(bounding_box.getMinY() / tile_size.height)));
-    int right_up_gid = layer0->getTileGIDAt(Vec2((int)bounding_box.getMaxX() / tile_size.width,
-                                                 int(bounding_box.getMaxY() / tile_size.height)));
+    // tmx地图从左上角算(0, 0)行列值的原点，要做坐标转换
+    float MinX = bounding_box.getMinX();
+    float MaxX = bounding_box.getMaxX();
+    float MinY = map_size.height - bounding_box.getMinY();
+    float MaxY = map_size.height - bounding_box.getMaxY();
+    
+    // 小幅度修正一下边界值，避免地图标号超范围
+    if (MinY >= map_size.height)
+        MinY -= 0.1;
+    
+    CCLOG("box origin x: %f, origin y: %f", bounding_box.origin.x, bounding_box.origin.y);
+    CCLOG("MinX: %f, MaxX: %f, MinY: %f, MaxY: %f", MinX, MaxX, MinY, MaxY);
+    
+    CCLOG("=======");
+    CCLOG("left down pos: %d, %d", int(MinX / tile_size.width),
+          int(MinY / tile_size.height));
+    CCLOG("left up pos: %d, %d", int(MinX / tile_size.width),
+          int(MaxY / tile_size.height));
+    CCLOG("right down pos: %d, %d", int(MaxX / tile_size.width),
+          int(MinY / tile_size.height));
+    CCLOG("right up pos: %d, %d", int(MaxX / tile_size.width),
+          int(MaxY / tile_size.height));
+    CCLOG("=======");
+    
+    int left_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                  int(MinY / tile_size.height)));
+    int left_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                int(MaxY / tile_size.height)));
+    int right_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                   int(MinY / tile_size.height)));
+    int right_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                 int(MaxY / tile_size.height)));
+    
     
     CCLOG("gid left_down: %d, left_up: %d, right_down: %d, right_up: %d", left_down_gid, left_up_gid, right_down_gid, right_up_gid);
     
     CCLOG("gid tile type left_down: %d, left_up: %d, right_down: %d, right_up: %d",
           kTileHash[left_down_gid], kTileHash[left_up_gid], kTileHash[right_down_gid], kTileHash[right_up_gid]);
 
-    
-    // 若有一个定点所在范围不是空白或草坪就算碰撞（其实如果考虑有船过水的话要复杂一些）
+    // 若有一个顶点所在范围不是空白或草坪就算碰撞（其实如果考虑有船过水的话要复杂一些）
     if (kTileHash[left_down_gid] != BLANK && kTileHash[left_down_gid] != GRASS && (direction == LEFT || direction == DOWN)
         || kTileHash[left_up_gid] != BLANK && kTileHash[left_up_gid] != GRASS && (direction == LEFT || direction == UP)
         || kTileHash[right_down_gid] != BLANK && kTileHash[right_down_gid] != GRASS && (direction == RIGHT || direction == DOWN)
         || kTileHash[right_up_gid] != BLANK && kTileHash[right_up_gid] != GRASS && (direction == RIGHT || direction == UP))
     {
-
-        
+        CCLOG("reached obstacle");
         return true;
     }
     
+
     
     return false;
 }

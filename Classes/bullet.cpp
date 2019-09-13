@@ -26,6 +26,7 @@ void Bullet::initWithDirection(JoyDirection direction)
     
     // 设置纹理和子弹速度
     setTexture("img/tank/bullet.png");
+    m_type = BASE; // 默认是普通子弹
     m_speed = kLowSpeed;
     m_kill_hp = kLowKillHp;
     

@@ -36,11 +36,11 @@ bool GameScene::init()
     m_battle_field->initWithLevel(m_round);
     addChild(m_battle_field, kMapZorder);
     
-    Size tile_size = m_battle_field->getTileSize();
-    Size map_array = m_battle_field->getMapSize();
     Size map_size = m_battle_field->getContentSize();
+    Size map_array = m_battle_field->getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()拿到的值应该是大方块的尺寸，不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
     
-    // print map info
     CCLOG("tile size, width %f, height %f", tile_size.width, tile_size.height);
     CCLOG("map array, row %f, col %f", map_array.height, map_array.width);
     CCLOG("map size, width %f, height %f", map_size.width, map_size.height);
@@ -48,9 +48,9 @@ bool GameScene::init()
     // 加载玩家坦克
     m_player1 = Player::create();
     m_player1->initWithType(P1);
-    m_player1->setSize(tile_size * kTankSizeFactor); // should fit tile size
-    m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 2,
-                           m_battle_field->getPositionY() + tile_size.height / 2);
+    m_player1->setSize(tile_size * 2 * kTankSizeFactor); // should fit tile size
+    m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 4,
+                           m_battle_field->getPositionY() + tile_size.height); // 注意一个大方块由4个小方块拼成
     addChild(m_player1, kMapZorder);
     
     // 加载敌方坦克, 每批增加六个
@@ -122,8 +122,12 @@ void GameScene::onFireBtn(bool is_pressed)
         {
             // TODO: every moment make sure only limit number bullet in the screen
             // FIXME: timer would wait at least one delay interval, here shoot a bullet at one
-            Bullet* bullet = m_player1->shootSingle();
-            addChild(bullet, kMapZorder);
+            if (m_player_bullets.empty())
+            {
+                Bullet* bullet = m_player1->shootSingle();
+                addChild(bullet, kMapZorder);
+                m_player_bullets.pushBack(bullet);
+            }
             
             schedule(schedule_selector(GameScene::emitPlayerBullet), m_player1->m_bullet_interval);
         }
@@ -136,15 +140,21 @@ void GameScene::onFireBtn(bool is_pressed)
 
 void GameScene::emitPlayerBullet(float tm)
 {
-    Bullet* bullet = m_player1->shootSingle();
-    addChild(bullet, kMapZorder);
+    // 小技巧，如果子弹消失了则快速发射一颗，所以子弹发射频率会随着碰撞调整
+    if (m_player_bullets.empty())
+    {
+        Bullet* bullet = m_player1->shootSingle();
+        addChild(bullet, kMapZorder);
+        m_player_bullets.pushBack(bullet);
+    }
 }
 
 void GameScene::generateEnemy()
 {
-    Size tile_size = m_battle_field->getTileSize();
-    Size map_array = m_battle_field->getMapSize();
     Size map_size = m_battle_field->getContentSize();
+    Size map_array = m_battle_field->getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
     
     // 根据概率生成敌方坦克
     float tank_type_factor = CCRANDOM_0_1();
@@ -158,7 +168,7 @@ void GameScene::generateEnemy()
     
     Enemy* enemy = Enemy::create();
     enemy->initWithType(enemy_type);
-    enemy->setSize(tile_size * kTankSizeFactor);
+    enemy->setSize(tile_size * 2 * kTankSizeFactor);
     
     // 随机生成位置，顶部三个空位
     float tank_pos_factor = CCRANDOM_0_1();
@@ -191,8 +201,18 @@ void GameScene::update(float dt)
 //    CCLOG("update delta: %f", dt);
     
     // --- 碰撞检测 ---
+    // 子弹击中
+    for (Bullet* bullet : m_player_bullets)
+    {
+        if (m_battle_field->isBulletCollide(bullet->getBoundingBox(), bullet->m_type))
+        {
+            m_player_bullets.eraseObject(bullet);
+            bullet->removeFromParent();
+        }
+    }
+    
     // 玩家移动障碍
-    if (m_battle_field->isCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
+    if (m_battle_field->isTankCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
     {
         CCLOG("player can not move");
         m_player1->m_move_enable = false;

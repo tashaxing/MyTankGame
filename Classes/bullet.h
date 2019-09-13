@@ -18,6 +18,7 @@ public:
     CREATE_FUNC(Bullet);
     
 public:
+    BulletType m_type; // 子弹类型
     int m_kill_hp; // 子弹的杀伤力
     bool m_hit_flag; // 标记子弹是否已击中
     
