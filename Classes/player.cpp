@@ -5,8 +5,8 @@ using namespace CocosDenshion;
 
 const float kFrameUpdateInterval = 0.02;
 
-const float kBulletBaseInterval = 0.5;
-const float kBulletPowerInterval = 0.5;
+const float kBulletBaseInterval = 0.2;
+const float kBulletPowerInterval = 0.1;
 const float kMoveSpeed = 1.0;
 
 bool Player::init()

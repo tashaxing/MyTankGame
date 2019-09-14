@@ -1,4 +1,7 @@
+#include <SimpleAudioEngine.h>
 #include "battle_field.h"
+
+using namespace CocosDenshion;
 
 // tmx地图方块gid与方块类型的映射
 const TileType kTileHash[] = {
@@ -66,6 +69,7 @@ bool BattleField::isBulletCollide(Rect bounding_box, BulletType bullet_type)
     // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
     Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
     
+    
     // 不能出界
     if (bounding_box.getMinX() <= 0.1 || bounding_box.getMaxX() >= map_size.width - 0.1
         || bounding_box.getMinY() <= 0.1 || bounding_box.getMaxY() >= map_size.height - 0.1)
@@ -85,8 +89,10 @@ bool BattleField::isBulletCollide(Rect bounding_box, BulletType bullet_type)
     float MaxY = map_size.height - bounding_box.getMaxY();
     
     // 小幅度修正一下边界值，避免地图标号超范围
+    if (MaxX >= map_size.width)
+        MaxX = map_size.width - 0.1;
     if (MinY >= map_size.height)
-        MinY -= 0.1;
+        MinY = map_size.height - 0.1;
     
     int left_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
                                                   int(MinY / tile_size.height)));
@@ -99,69 +105,89 @@ bool BattleField::isBulletCollide(Rect bounding_box, BulletType bullet_type)
 
     // 子弹击中，消除对应的砖块
     // 普通子弹只能打土砖
+    bool hit_flag = false;
     if (bullet_type == BASE)
     {
+        // 可能一次打两个小块
         if (kTileHash[left_down_gid] == WALL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
                                       int(MinY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
         
         if (kTileHash[left_up_gid] == WALL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
                                       int(MaxY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
             
         if (kTileHash[right_down_gid] == WALL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
                                       int(MinY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
             
         if (kTileHash[right_up_gid] == WALL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
                                       int(MaxY / tile_size.height)));
-            return true;
+            hit_flag = true;
+        }
+        
+        // 如果遇到钢板则直接算碰撞，打不了砖块
+        if (kTileHash[left_down_gid] == STEEL
+            || kTileHash[left_up_gid] == STEEL
+            || kTileHash[right_down_gid] == STEEL
+            || kTileHash[right_up_gid] == STEEL)
+        {
+            SimpleAudioEngine::getInstance()->playEffect("sound/steelhit.wav");
+            hit_flag = true;
         }
     }
-    // 火力子弹可以打钢板
-    if (bullet_type == POWER)
+    else if (bullet_type == POWER)
     {
+        // 火力子弹可以打钢板
         if (kTileHash[left_down_gid] == WALL || kTileHash[left_down_gid] == STEEL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
                                       int(MinY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
         
         if (kTileHash[left_up_gid] == WALL || kTileHash[left_up_gid] == STEEL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MinX / tile_size.width),
                                       int(MaxY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
         
         if (kTileHash[right_down_gid] == WALL || kTileHash[right_down_gid] == STEEL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
                                       int(MinY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
         
         if (kTileHash[right_up_gid] == WALL || kTileHash[right_up_gid] == STEEL)
         {
+            SimpleAudioEngine::getInstance()->playEffect("sound/brickhit.wav");
             layer0->removeTileAt(Vec2(int(MaxX / tile_size.width),
                                       int(MaxY / tile_size.height)));
-            return true;
+            hit_flag = true;
         }
     }
     
-    return false;
+    return hit_flag;
 }
 
 bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
@@ -196,8 +222,10 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
     float MaxY = map_size.height - bounding_box.getMaxY();
     
     // 小幅度修正一下边界值，避免地图标号超范围
+    if (MaxX >= map_size.width)
+        MaxX = map_size.width - 0.1;
     if (MinY >= map_size.height)
-        MinY -= 0.1;
+        MinY = map_size.height - 0.1;
     
     CCLOG("box origin x: %f, origin y: %f", bounding_box.origin.x, bounding_box.origin.y);
     CCLOG("MinX: %f, MaxX: %f, MinY: %f, MaxY: %f", MinX, MaxX, MinY, MaxY);
@@ -217,9 +245,9 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
                                                   int(MinY / tile_size.height)));
     int left_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
                                                 int(MaxY / tile_size.height)));
-    int right_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+    int right_down_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
                                                    int(MinY / tile_size.height)));
-    int right_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+    int right_up_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
                                                  int(MaxY / tile_size.height)));
     
     
@@ -237,8 +265,6 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
         CCLOG("reached obstacle");
         return true;
     }
-    
 
-    
     return false;
 }
