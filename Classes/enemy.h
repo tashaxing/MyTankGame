@@ -25,7 +25,7 @@ public:
     void setSize(Size size);
     
 public:
-    void setMoveDirection(JoyDirection direction);
+    void setDirection(JoyDirection direction);
     JoyDirection m_head_direction;
     void move(float tm);
     Bullet* shoot();
@@ -34,12 +34,11 @@ public:
     
     int m_hp;
     EnemyType m_type;
+    bool m_moving;
     
 private:
     Size m_size;
     float m_speed;
-    
-    JoyDirection m_move_direction; // 坦克行进方向
 };
 
 #endif /* _ENEMY_H_ */

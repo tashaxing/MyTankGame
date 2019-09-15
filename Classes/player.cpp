@@ -5,8 +5,7 @@ using namespace CocosDenshion;
 
 const float kFrameUpdateInterval = 0.02;
 
-const float kBulletBaseInterval = 0.2;
-const float kBulletPowerInterval = 0.1;
+const float kBulletInterval = 0.2;
 const float kMoveSpeed = 1.0;
 
 bool Player::init()
@@ -40,13 +39,10 @@ void Player::initWithType(PlayerType player_type)
     
     // 初始子弹
     m_bullet_type = BASE;
-    m_bullet_interval = kBulletBaseInterval;
+    m_bullet_interval = kBulletInterval;
     
-    // 初始方向无
-    m_move_direction = NONE;
-    
-    // 初始允许移动
-    m_move_enable = true;
+    // 初始不在移动状态
+    m_moving = false;
     
     // 播放出生动画
     Animate* player_born_anim = Animate::create(AnimationCache::getInstance()->getAnimation("player_born_animation"));
@@ -80,13 +76,11 @@ void Player::setSize(Size size)
     setContentSize(m_size);
 }
 
-void Player::setMoveDirection(JoyDirection direction)
+void Player::setDirection(JoyDirection direction)
 {
-    // 方便区分朝向和移动方向（因为停止移动也是一种方向）
+    // 改变方向，如果摇杆归位了则不改变方向
     if (direction != NONE)
         m_head_direction = direction;
-    
-    m_move_direction = direction;
     
     // 根据不同朝向切换不同纹理，无敌状态不切换
     if (m_status == SIMPLE)
@@ -120,20 +114,17 @@ void Player::setMoveDirection(JoyDirection direction)
 
 void Player::move(float tm)
 {
-    if (!m_move_enable)
+    if (!m_moving)
         return;
     
     // 间隔固定时间发出移动音效
     static int step_count = 0;
     step_count++;
     if (step_count % 8 == 0)
-    {
-        if (m_move_direction != NONE)
-            SimpleAudioEngine::getInstance()->playEffect("sound/moving.wav");
-    }
+        SimpleAudioEngine::getInstance()->playEffect("sound/moving.wav");
     
     // 四个方向移动
-    switch (m_move_direction)
+    switch (m_head_direction)
     {
         case UP:
             setPositionY(getPositionY() + kMoveSpeed);

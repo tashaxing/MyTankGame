@@ -51,6 +51,15 @@ bool Joypad::init()
                     m_game_scene->onFireBtn(false);
             }
                 break;
+            case ui::Widget::TouchEventType::CANCELED:
+            {
+                // 其他动作，比如触点离开按钮
+                // 停止开火
+                // callback
+                if (m_game_scene)
+                    m_game_scene->onFireBtn(false);
+            }
+                break;
             default:
                 break;
         }

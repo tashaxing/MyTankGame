@@ -99,7 +99,7 @@ void GameScene::onEnumDirection(JoyDirection direction)
     // 只有方向改变时才给玩家坦克发控制指令
     if (direction != pre_direction)
     {
-        m_player1->setMoveDirection(direction);
+        m_player1->setDirection(direction);
         pre_direction = direction;
     }
 }
@@ -185,13 +185,13 @@ void GameScene::generateEnemy()
     // 随机改变方向，一直移动中
     float tank_direction_factor = CCRANDOM_0_1();
     if (tank_direction_factor < 0.25)
-        enemy->setMoveDirection(UP);
+        enemy->setDirection(UP);
     else if (tank_direction_factor >= 0.25 && tank_direction_factor < 0.5)
-        enemy->setMoveDirection(DOWN);
+        enemy->setDirection(DOWN);
     else if (tank_direction_factor >= 0.5 && tank_direction_factor < 0.75)
-        enemy->setMoveDirection(LEFT);
+        enemy->setDirection(LEFT);
     else
-        enemy->setMoveDirection(RIGHT);
+        enemy->setDirection(RIGHT);
     
     addChild(enemy, kMapZorder);
 }
@@ -211,19 +211,17 @@ void GameScene::update(float dt)
         }
     }
     
-    // 玩家移动障碍
+    // 玩家遇到移动障碍时停止移动
     if (m_battle_field->isTankCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
     {
         CCLOG("player can not move");
-        m_player1->m_move_enable = false;
+        m_player1->m_moving = false;
     }
     else
     {
         CCLOG("player can move");
-        m_player1->m_move_enable = true;
+        m_player1->m_moving = true;
     }
-    
-    
     
     // --- 场景管理 ---
 }

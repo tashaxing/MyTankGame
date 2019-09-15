@@ -37,16 +37,14 @@ public:
     
 public:
     void setSize(Size size);
-    void setMoveDirection(JoyDirection direction);
+    void setDirection(JoyDirection direction);
     JoyDirection m_head_direction; // 坦克朝向
     float m_bullet_interval;
-    bool m_move_enable;
+    bool m_moving;
     
 private:
     Size m_size;
     PlayerStatus m_status;
-    
-    JoyDirection m_move_direction; // 坦克行进方向
     BulletType m_bullet_type; // 根据子弹类型改变子弹
 };
 

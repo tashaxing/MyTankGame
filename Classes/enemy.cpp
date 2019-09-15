@@ -42,7 +42,6 @@ void Enemy::initWithType(EnemyType enemy_type)
     
     // 初始方向
     m_head_direction = DOWN;
-    m_move_direction = DOWN;
     
     // 调度坦克移动
     schedule(schedule_selector(Enemy::move), kFrameUpdateInterval);
@@ -54,10 +53,9 @@ void Enemy::setSize(Size size)
     setContentSize(m_size);
 }
 
-void Enemy::setMoveDirection(JoyDirection direction)
+void Enemy::setDirection(JoyDirection direction)
 {
     m_head_direction = direction;
-    m_move_direction = direction;
     
     // 切换方向和纹理
     switch (m_type)
@@ -139,13 +137,10 @@ void Enemy::move(float tm)
     static int step_count = 0;
     step_count++;
     if (step_count % 8 == 0 && step_count < 100)
-    {
-        if (m_move_direction != NONE)
-            SimpleAudioEngine::getInstance()->playEffect("sound/nmoving.wav");
-    }
+        SimpleAudioEngine::getInstance()->playEffect("sound/nmoving.wav");
     
     // 四个方向移动
-    switch (m_move_direction)
+    switch (m_head_direction)
     {
         case UP:
             setPositionY(getPositionY() + m_speed);

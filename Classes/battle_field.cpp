@@ -216,6 +216,7 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
     
     // 根据包围盒四个角的行列坐标判断gid对应的tile类别
     // tmx地图从左上角算(0, 0)行列值的原点，要做坐标转换
+    // FIXME: 优化点，确保坦克能平滑过空白，又不卡进墙里
     float MinX = bounding_box.getMinX();
     float MaxX = bounding_box.getMaxX();
     float MinY = map_size.height - bounding_box.getMinY();
@@ -257,13 +258,30 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
           kTileHash[left_down_gid], kTileHash[left_up_gid], kTileHash[right_down_gid], kTileHash[right_up_gid]);
 
     // 若有一个顶点所在范围不是空白或草坪就算碰撞（其实如果考虑有船过水的话要复杂一些）
-    if (kTileHash[left_down_gid] != BLANK && kTileHash[left_down_gid] != GRASS && (direction == LEFT || direction == DOWN)
-        || kTileHash[left_up_gid] != BLANK && kTileHash[left_up_gid] != GRASS && (direction == LEFT || direction == UP)
-        || kTileHash[right_down_gid] != BLANK && kTileHash[right_down_gid] != GRASS && (direction == RIGHT || direction == DOWN)
-        || kTileHash[right_up_gid] != BLANK && kTileHash[right_up_gid] != GRASS && (direction == RIGHT || direction == UP))
+    // 分方向判断才能保证坦克不会被卡住，换了方向后就能继续移动
+    if (direction == UP)
     {
-        CCLOG("reached obstacle");
-        return true;
+        if (kTileHash[left_up_gid] != BLANK && kTileHash[left_up_gid] != GRASS
+            || kTileHash[right_up_gid] != BLANK && kTileHash[right_up_gid] != GRASS)
+            return true;
+    }
+    else if (direction == DOWN)
+    {
+        if (kTileHash[left_down_gid] != BLANK && kTileHash[left_down_gid] != GRASS
+            || kTileHash[right_down_gid] != BLANK && kTileHash[right_down_gid] != GRASS)
+            return true;
+    }
+    else if (direction == LEFT)
+    {
+        if (kTileHash[left_down_gid] != BLANK && kTileHash[left_down_gid] != GRASS
+            || kTileHash[left_up_gid] != BLANK && kTileHash[left_up_gid] != GRASS)
+            return true;
+    }
+    else if (direction == RIGHT)
+    {
+        if (kTileHash[right_down_gid] != BLANK && kTileHash[right_down_gid] != GRASS
+            || kTileHash[right_up_gid] != BLANK && kTileHash[right_up_gid] != GRASS)
+            return true;
     }
 
     return false;
