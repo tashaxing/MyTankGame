@@ -9,7 +9,7 @@ const int kItemZorder = 1;
 const int kJoypadZorder = 3;
 const int kLevelSplashZorder = 5;
 
-const float kBulletGenerateInterval = 2.0;
+const float kEnemyBulletInterval = 1.0;
 
 const float kTankSizeFactor = 0.8;
 const int kEnemyBatchTankCount = 4;
@@ -29,6 +29,9 @@ bool GameScene::init()
         return false;
     
     CCLOG("=== start level %d ===", m_round);
+    
+    // 初始化游戏标志
+    m_is_over = false;
     
     Point visible_origin = Director::getInstance()->getVisibleOrigin();
     Size visible_size = Director::getInstance()->getVisibleSize();
@@ -59,7 +62,7 @@ bool GameScene::init()
     for (int i = 0; i < kEnemyBatchTankCount; i++)
         generateEnemy(0);
     schedule(schedule_selector(GameScene::generateEnemy), kEnemyGenerateInterval);
-    
+    schedule(schedule_selector(GameScene::emitEnemyBullet), kEnemyBulletInterval);
     
     // 加载摇杆控制
     m_joypad = Joypad::create();
@@ -124,7 +127,7 @@ void GameScene::onFireBtn(bool is_pressed)
         // 调度子弹，同时考虑单发和i连发
         if (is_pressed)
         {
-            // TODO: every moment make sure only limit number bullet in the screen
+            // TODO: every moment make sure only limit number bullets in the screen
             // FIXME: timer would wait at least one delay interval, here shoot a bullet at one
             if (m_player_bullets.empty())
             {
@@ -139,17 +142,6 @@ void GameScene::onFireBtn(bool is_pressed)
             unschedule(schedule_selector(GameScene::emitPlayerBullet));
             
         pre_press_status = is_pressed;
-    }
-}
-
-void GameScene::emitPlayerBullet(float tm)
-{
-    // 小技巧，如果子弹消失了则快速发射一颗，所以子弹发射频率会随着碰撞调整
-    if (m_player_bullets.empty())
-    {
-        Bullet* bullet = m_player1->shootSingle();
-        addChild(bullet, kMapZorder);
-        m_player_bullets.pushBack(bullet);
     }
 }
 
@@ -180,14 +172,14 @@ void GameScene::generateEnemy(float tm)
     // 随机生成位置，顶部三个空位
     float tank_pos_factor = CCRANDOM_0_1();
     if (tank_pos_factor <= 1.0 / 3)
-        enemy->setPosition(m_battle_field->getPositionX() + tile_size.width / 2,
-                           m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
+        enemy->setPosition(m_battle_field->getPositionX() + tile_size.width,
+                           m_battle_field->getPositionY() + map_size.height - tile_size.height);
     else if (tank_pos_factor >= 1.0 / 3 && tank_pos_factor < 2.0 / 3)
         enemy->setPosition(m_battle_field->getPositionX() + map_size.width / 2,
-                           m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
+                           m_battle_field->getPositionY() + map_size.height - tile_size.height);
     else
-        enemy->setPosition(m_battle_field->getPositionX() + tile_size.width - tile_size.width / 2,
-                           m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
+        enemy->setPosition(m_battle_field->getPositionX() + map_size.width - tile_size.width,
+                           m_battle_field->getPositionY() + map_size.height - tile_size.height);
     
     // 随机生成方向
     float tank_direction_factor = CCRANDOM_0_1();
@@ -204,12 +196,112 @@ void GameScene::generateEnemy(float tm)
     m_enemies.pushBack(enemy);
 }
 
+void GameScene::emitPlayerBullet(float tm)
+{
+    // 小技巧，如果子弹消失了则快速发射一颗，所以子弹发射频率会随着碰撞调整
+    if (m_player_bullets.empty())
+    {
+        Bullet* bullet = m_player1->shootSingle();
+        addChild(bullet, kMapZorder);
+        m_player_bullets.pushBack(bullet);
+    }
+}
+
+void GameScene::emitEnemyBullet(float tm)
+{
+    for (Enemy* enemy : m_enemies)
+    {
+        // 不同的敌人坦克根据类型，发射子弹频率不同
+        float enemy_shoot_factor = CCRANDOM_0_1();
+        if (enemy->m_type == NORMAL && enemy_shoot_factor >= 0.5
+            || enemy->m_type == ARMOR && enemy_shoot_factor >= 0.2
+            || enemy->m_type == SPEED && enemy_shoot_factor >= 0.7)
+        {
+            Bullet* bullet = enemy->shoot();
+            addChild(bullet, kMapZorder);
+            m_enemy_bullets.pushBack(bullet);
+        }
+    }
+}
+
+void GameScene::gameOver()
+{
+    CCLOG("game over");
+    m_is_over = true;
+}
+
 void GameScene::update(float dt)
 {
 //    CCLOG("update delta: %f", dt);
     
-    // --- 碰撞检测 ---
-    // 子弹击中
+    // ==== 碰撞检测 ====
+    // --- 玩家被子弹击中 ---
+    if (!m_is_over)
+    {
+        for (Bullet* bullet : m_enemy_bullets)
+        {
+            if (m_player1->getBoundingBox().intersectsRect(bullet->getBoundingBox()))
+            {
+                CCLOG("player1 destroyed");
+                
+                m_player_bullets.eraseObject(bullet);
+                bullet->removeFromParent();
+                m_player1->destroy();
+                
+                if (m_player1_life == 0)
+                    gameOver();
+                else
+                {
+                    // 加载玩家坦克
+                    Size map_size = m_battle_field->getContentSize();
+                    Size map_array = m_battle_field->getMapSize();
+                    // tmx地图的方格必须用行列值重新计算，getTileSize()拿到的值应该是大方块的尺寸，不准确的
+                    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+                    
+                    m_player1 = Player::create();
+                    m_player1->initWithType(P1);
+                    m_player1->setSize(tile_size * 2 * kTankSizeFactor); // should fit tile size
+                    m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 4,
+                                           m_battle_field->getPositionY() + tile_size.height); // 注意一个大方块由4个小方块拼成
+                    addChild(m_player1, kMapZorder);
+                    
+                    m_player1_life--;
+                }
+            }
+        }
+    }
+
+    // --- 敌人坦克被子弹击中 ---
+    Vector<Bullet*> hit_bullets;
+    for (Bullet* bullet : m_player_bullets)
+    {
+        for (Enemy* enemy : m_enemies)
+        {
+            if (!bullet->m_hit_flag
+                && enemy->m_life > 0
+                && bullet->getBoundingBox().intersectsRect(enemy->getBoundingBox()))
+            {
+                enemy->hit();
+                if (enemy->m_life == 0)
+                {
+                    enemy->die();
+                    m_enemies.eraseObject(enemy);
+                    enemy->removeFromParent();
+                }
+                
+                bullet->m_hit_flag = true;
+                hit_bullets.pushBack(bullet);
+            }
+        }
+    }
+    for (Bullet* bullet : hit_bullets)
+    {
+        m_player_bullets.eraseObject(bullet);
+        bullet->removeFromParent();
+    }
+    hit_bullets.clear();
+    
+    // --- 子弹击中砖块 ---
     for (Bullet* bullet : m_player_bullets)
     {
         if (m_battle_field->isBulletCollide(bullet->getBoundingBox(), bullet->m_type))
@@ -219,7 +311,21 @@ void GameScene::update(float dt)
         }
     }
     
-    // 敌人坦克遇到障碍时则变换方向
+    
+    for (Bullet* bullet : m_enemy_bullets)
+    {
+        if (m_battle_field->isBulletCollide(bullet->getBoundingBox(), bullet->m_type))
+            hit_bullets.pushBack(bullet); // 标记起来统一清除，避免指针问题
+    }
+    
+    for (Bullet* bullet : hit_bullets)
+    {
+        m_enemy_bullets.eraseObject(bullet);
+        bullet->removeFromParent();
+    }
+    hit_bullets.clear();
+    
+    // --- 敌人坦克遇到障碍时则变换方向 ---
     for (Enemy* enemy : m_enemies)
     {
         if (m_battle_field->isTankCollide(enemy->getBoundingBox(), enemy->m_head_direction))
@@ -235,7 +341,7 @@ void GameScene::update(float dt)
         }
     }
     
-    // 玩家遇到移动障碍时停止移动
+    // --- 玩家遇到砖块时停止移动 ---
     if (m_battle_field->isTankCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
     {
         CCLOG("player can not move");
@@ -247,7 +353,11 @@ void GameScene::update(float dt)
         m_player1->m_moving = true;
     }
     
-    // --- 场景管理 ---
+    // --- 玩家碰到敌人坦克时停止移动 ---
+    
+    
+    // --- 玩家坦克拾取道具 ---
+    
 }
 
 void GameScene::onEnter()

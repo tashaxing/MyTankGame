@@ -30,15 +30,16 @@ public:
     void move(float tm);
     void changeDirection();
     Bullet* shoot();
-    void hit(int reduce_hp);
+    void hit();
     void die();
+    int m_life;
     
-    int m_hp;
     EnemyType m_type;
     bool m_moving;
     
 private:
     Size m_size;
+    
     float m_speed;
 };
 

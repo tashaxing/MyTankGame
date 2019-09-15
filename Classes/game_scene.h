@@ -22,20 +22,29 @@ public:
     virtual void update(float dt);
     
     CREATE_FUNC(GameScene);
-    
+
 public:
 	void onEnumDirection(JoyDirection direction); // 控制摇杆方向回调，枚举值
 	void onAngleDirection(float angle); // 控制摇杆方向回调，任意角度
 	void onFireBtn(bool is_pressed);
-    int m_round = 2; // 第几关，默认第一关
+    int m_round = 1; // 第几关，默认第一关
+    
+private:
+    void gameOver();
+    bool m_is_over;
+    int m_player1_life = 2; // 初始生命值
+    int m_player2_life = 2;
 
 private:
     void emitPlayerBullet(float tm);
-    Vector<Bullet*> m_player_bullets;
+    Vector<Bullet*> m_player_bullets; // 场景中玩家的子弹
+    void emitEnemyBullet(float tm);
+    Vector<Bullet*> m_enemy_bullets; // 场景中敌人的子弹
     
     Vector<Enemy*> m_enemies;
-    Vector<Bullet*> m_enemy_bullets;
     void generateEnemy(float tm);
+    
+    void generateItem();
     
     BattleField* m_battle_field;
     int m_total_enemy_count = 20; // 默认每局敌人数量

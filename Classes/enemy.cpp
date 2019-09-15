@@ -40,8 +40,29 @@ void Enemy::initWithType(EnemyType enemy_type)
             break;
     }
     
+    // 初始生命
+    switch (enemy_type)
+    {
+        case NORMAL:
+            m_life = 1;
+            break;
+        case ARMOR:
+            m_life = 3;
+            break;
+        case SPEED:
+            m_life = 2;
+            break;
+        default:
+            break;
+    }
+    
     // 初始方向
     m_head_direction = DOWN;
+    
+    // 初始可移动
+    m_moving = true;
+    
+    // 播放出生动画
     
     // 调度坦克移动
     schedule(schedule_selector(Enemy::move), kFrameUpdateInterval);
@@ -166,6 +187,7 @@ void Enemy::changeDirection()
 {
     // 随机变换方向
     float tank_direction_factor = CCRANDOM_0_1();
+//    float tank_direction_factor = rand() % 100 / 100.0;
     if (tank_direction_factor < 0.25)
         setDirection(UP);
     else if (tank_direction_factor >= 0.25 && tank_direction_factor < 0.5)
@@ -200,4 +222,15 @@ Bullet* Enemy::shoot()
     }
     
     return bullet;
+}
+
+void Enemy::hit()
+{
+    SimpleAudioEngine::getInstance()->playEffect("sound/shieldhit.wav");
+    m_life--;
+}
+
+void Enemy::die()
+{
+    SimpleAudioEngine::getInstance()->playEffect("sound/eexplosion.wav");
 }

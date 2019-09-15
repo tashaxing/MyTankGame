@@ -180,3 +180,12 @@ void Player::fetchItem(ItemType item_type)
     // 拾取不同道具，产生不同影响
     
 }
+
+void Player::destroy()
+{
+    // 被摧毁音效
+    SimpleAudioEngine::getInstance()->playEffect("sound/fexplosion.wav");
+    
+    // 删除坦克
+    removeFromParent();
+}

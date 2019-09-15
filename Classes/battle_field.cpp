@@ -42,15 +42,15 @@ void BattleField::initWithLevel(int round)
     CCLOG("map array, row %f, col %f", map_array.height, map_array.width);
     CCLOG("map size, width %f, height %f", map_size.width, map_size.height);
     
-    // 画外框线，局部坐标系，以左下角为原点
+    // 画外框线，地图边缘外扩留点余量，局部坐标系，以左下角为原点
     DrawNode* map_frame = DrawNode::create();
     Point rect[4] = {
-        Point(0.0, 0.0),
-        Point(getContentSize().width, 0.0),
-        Point(getContentSize().width, getContentSize().height),
-        Point(0.0, getContentSize().height)
+        Point(-1.0, -1.0),
+        Point(getContentSize().width + 1.0, -1.0),
+        Point(getContentSize().width + 1.0, getContentSize().height + 1.0),
+        Point(-1.0, getContentSize().height + 1.0)
     };
-    map_frame->drawPolygon(rect, 4, Color4F(0, 0, 0, 1), 1.5, Color4F::YELLOW);
+    map_frame->drawPolygon(rect, 4, Color4F(0, 0, 0, 1), 0.6, Color4F::YELLOW);
     addChild(map_frame, -1); // 置于底层
     
     setAnchorPoint(Point::ZERO); // 地图整体左下角作为锚点方便全局定位
