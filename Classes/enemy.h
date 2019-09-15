@@ -28,6 +28,7 @@ public:
     void setDirection(JoyDirection direction);
     JoyDirection m_head_direction;
     void move(float tm);
+    void changeDirection();
     Bullet* shoot();
     void hit(int reduce_hp);
     void die();

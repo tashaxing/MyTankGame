@@ -55,6 +55,7 @@ void Enemy::setSize(Size size)
 
 void Enemy::setDirection(JoyDirection direction)
 {
+    // 敌机不会停，只有四个方向
     m_head_direction = direction;
     
     // 切换方向和纹理
@@ -133,6 +134,9 @@ void Enemy::setDirection(JoyDirection direction)
 
 void Enemy::move(float tm)
 {
+    if (!m_moving)
+        return;
+    
     // 间隔固定时间发出移动音效
     static int step_count = 0;
     step_count++;
@@ -156,6 +160,20 @@ void Enemy::move(float tm)
         default:
             break;
     }
+}
+
+void Enemy::changeDirection()
+{
+    // 随机变换方向
+    float tank_direction_factor = CCRANDOM_0_1();
+    if (tank_direction_factor < 0.25)
+        setDirection(UP);
+    else if (tank_direction_factor >= 0.25 && tank_direction_factor < 0.5)
+        setDirection(DOWN);
+    else if (tank_direction_factor >= 0.5 && tank_direction_factor < 0.75)
+        setDirection(LEFT);
+    else
+        setDirection(RIGHT);
 }
 
 Bullet* Enemy::shoot()

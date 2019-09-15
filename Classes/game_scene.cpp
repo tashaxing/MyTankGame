@@ -12,6 +12,8 @@ const int kLevelSplashZorder = 5;
 const float kBulletGenerateInterval = 2.0;
 
 const float kTankSizeFactor = 0.8;
+const int kEnemyBatchTankCount = 4;
+const float kEnemyGenerateInterval = 5.0;
 
 Scene* GameScene::createScene()
 {
@@ -53,9 +55,11 @@ bool GameScene::init()
                            m_battle_field->getPositionY() + tile_size.height); // 注意一个大方块由4个小方块拼成
     addChild(m_player1, kMapZorder);
     
-    // 加载敌方坦克, 每批增加六个
-    for (int i = 0; i < 6; i++)
-        generateEnemy();
+    // 初始加载4个敌方坦克
+    for (int i = 0; i < kEnemyBatchTankCount; i++)
+        generateEnemy(0);
+    schedule(schedule_selector(GameScene::generateEnemy), kEnemyGenerateInterval);
+    
     
     // 加载摇杆控制
     m_joypad = Joypad::create();
@@ -149,8 +153,11 @@ void GameScene::emitPlayerBullet(float tm)
     }
 }
 
-void GameScene::generateEnemy()
+void GameScene::generateEnemy(float tm)
 {
+    if (m_enemies.size() >= kEnemyBatchTankCount)
+        return;
+    
     Size map_size = m_battle_field->getContentSize();
     Size map_array = m_battle_field->getMapSize();
     // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
@@ -182,7 +189,7 @@ void GameScene::generateEnemy()
         enemy->setPosition(m_battle_field->getPositionX() + tile_size.width - tile_size.width / 2,
                            m_battle_field->getPositionY() + map_size.height - tile_size.height / 2);
     
-    // 随机改变方向，一直移动中
+    // 随机生成方向
     float tank_direction_factor = CCRANDOM_0_1();
     if (tank_direction_factor < 0.25)
         enemy->setDirection(UP);
@@ -194,6 +201,7 @@ void GameScene::generateEnemy()
         enemy->setDirection(RIGHT);
     
     addChild(enemy, kMapZorder);
+    m_enemies.pushBack(enemy);
 }
 
 void GameScene::update(float dt)
@@ -208,6 +216,22 @@ void GameScene::update(float dt)
         {
             m_player_bullets.eraseObject(bullet);
             bullet->removeFromParent();
+        }
+    }
+    
+    // 敌人坦克遇到障碍时则变换方向
+    for (Enemy* enemy : m_enemies)
+    {
+        if (m_battle_field->isTankCollide(enemy->getBoundingBox(), enemy->m_head_direction))
+        {
+            CCLOG("enemy can not move");
+            enemy->m_moving = false;
+            enemy->changeDirection();
+        }
+        else
+        {
+            CCLOG("enemy can move");
+            enemy->m_moving = true;
         }
     }
     

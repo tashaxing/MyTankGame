@@ -35,9 +35,10 @@ private:
     
     Vector<Enemy*> m_enemies;
     Vector<Bullet*> m_enemy_bullets;
-    void generateEnemy();
+    void generateEnemy(float tm);
     
     BattleField* m_battle_field;
+    int m_total_enemy_count = 20; // 默认每局敌人数量
     Player* m_player1;
     Joypad* m_joypad;
 };
