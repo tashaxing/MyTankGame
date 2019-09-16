@@ -224,6 +224,11 @@ void GameScene::emitEnemyBullet(float tm)
     }
 }
 
+void GameScene::generateItem()
+{
+    
+}
+
 void GameScene::gameOver()
 {
     CCLOG("game over");

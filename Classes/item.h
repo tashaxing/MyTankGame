@@ -7,11 +7,11 @@ USING_NS_CC;
 enum ItemType
 {
     ACTIVE, // 帽子
-    START,  // 火力星
+    STAR,  // 火力星
     BOMB,   // 炸弹
     SHOVEL,  // 铲子
     TIMER,  // 定时
-    MINTANK // 命
+    MINITANK // 命
 };
 
 class Item : public Sprite
@@ -20,9 +20,11 @@ public:
     virtual bool init();
     
     CREATE_FUNC(Item);
-    void initWithType(ItemType Item_type);
-    
+    void initWithType(ItemType item_type);
+
+public:
     ItemType m_type;
+    
 };
 
 #endif /* _ITEM_H_ */

@@ -66,7 +66,7 @@ void Player::initWithType(PlayerType player_type)
             default:
                 break;
         }
-        setContentSize(m_size); // 重设尺寸
+        setContentSize(m_size); // 重设尺寸（由于是异步，此时m_size已经被设置过）
     }), NULL) );
 }
 

@@ -21,25 +21,6 @@ void Enemy::initWithType(EnemyType enemy_type)
 {
     m_type = enemy_type;
     
-    // 根据纹理初始化不同的坦克
-    switch (enemy_type)
-    {
-        case NORMAL:
-            setTexture("img/tank/normal/normalD.png"); // 设置纹理必须用单个图片而不是帧缓存
-            m_speed = kMoveSpeedNormal;
-            break;
-        case ARMOR:
-            setTexture("img/tank/armor/armor3D.png");
-            m_speed = kMoveSpeedArmor;
-            break;
-        case SPEED:
-            setTexture("img/tank/speed/speedD.png");
-            m_speed = kMoveSpeedFast;
-            break;
-        default:
-            break;
-    }
-    
     // 初始生命
     switch (enemy_type)
     {
@@ -63,6 +44,29 @@ void Enemy::initWithType(EnemyType enemy_type)
     m_moving = true;
     
     // 播放出生动画
+    Animate* enemy_born_animation = Animate::create(AnimationCache::getInstance()->getAnimation("enemy_born_animation"));
+    runAction(Sequence::create(enemy_born_animation, CallFunc::create([&](){
+        
+        // 根据纹理初始化不同的坦克
+        switch (enemy_type)
+        {
+            case NORMAL:
+                setTexture("img/tank/normal/normalD.png"); // 设置纹理必须用单个图片而不是帧缓存
+                m_speed = kMoveSpeedNormal;
+                break;
+            case ARMOR:
+                setTexture("img/tank/armor/armor3D.png");
+                m_speed = kMoveSpeedArmor;
+                break;
+            case SPEED:
+                setTexture("img/tank/speed/speedD.png");
+                m_speed = kMoveSpeedFast;
+                break;
+            default:
+                break;
+        }
+        setContentSize(m_size); // 重设尺寸（由于是异步，此时m_size已经被设置过）
+    }), NULL) );
     
     // 调度坦克移动
     schedule(schedule_selector(Enemy::move), kFrameUpdateInterval);
