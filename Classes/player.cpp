@@ -177,6 +177,7 @@ Vector<Bullet*> Player::shootDouble()
 
 void Player::fetchItem(ItemType item_type)
 {
+    SimpleAudioEngine::getInstance()->playEffect("sound/bonus.wav");
     // 拾取不同道具，产生不同影响
     
 }

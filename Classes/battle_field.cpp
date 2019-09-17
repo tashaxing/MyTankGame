@@ -286,3 +286,48 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
 
     return false;
 }
+
+bool BattleField::isEagleHurt(Rect bounding_box)
+{
+    // 这里的包围盒坐标要转换成相对地图左下角原点的坐标，包围盒本身也是左下角为原点
+    bounding_box = Rect(bounding_box.origin.x - getPositionX(), bounding_box.origin.y - getPositionY(),
+                        bounding_box.size.width, bounding_box.size.height);
+    
+    Size map_size = getContentSize();
+    Size map_array = getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+    
+    TMXLayer* layer0 = getLayer("layer_0");
+    
+    // 根据包围盒四个角的行列坐标判断gid对应的tile类别
+    // tmx地图从左上角算(0, 0)行列值的原点，要做坐标转换
+    // FIXME: 优化点，确保坦克能平滑过空白，又不卡进墙里
+    float MinX = bounding_box.getMinX();
+    float MaxX = bounding_box.getMaxX();
+    float MinY = map_size.height - bounding_box.getMinY();
+    float MaxY = map_size.height - bounding_box.getMaxY();
+    
+    // 小幅度修正一下边界值，避免地图标号超范围
+    if (MaxX >= map_size.width)
+        MaxX = map_size.width - 0.1;
+    if (MinY >= map_size.height)
+        MinY = map_size.height - 0.1;
+    
+    int left_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                  int(MinY / tile_size.height)));
+    int left_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
+                                                int(MaxY / tile_size.height)));
+    int right_down_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
+                                                   int(MinY / tile_size.height)));
+    int right_up_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
+                                                 int(MaxY / tile_size.height)));
+    
+    if (kTileHash[left_up_gid] == EAGLE
+        || kTileHash[left_up_gid] == EAGLE
+        || kTileHash[right_down_gid] == EAGLE
+        || kTileHash[right_up_gid] == EAGLE)
+        return true;
+
+    return false;
+}

@@ -1,7 +1,17 @@
 #include "item.h"
 
+bool Item::init()
+{
+    if (!Sprite::init())
+        return false;
+    
+    return true;
+}
+
 void Item::initWithType(ItemType item_type)
 {
+    m_type = item_type;
+    
     // 根据纹理初始化不同的坦克
     switch (item_type)
     {
@@ -26,4 +36,8 @@ void Item::initWithType(ItemType item_type)
         default:
             break;
     }
+    
+    // 闪烁动画
+    Blink* blink = Blink::create(1.0, 9999); // 每1秒闪动一次，无限次
+    runAction(blink);
 }

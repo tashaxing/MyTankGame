@@ -28,6 +28,7 @@ public:
     
     bool isBulletCollide(Rect bounding_box, BulletType bullet_type); // 子弹的碰撞
     bool isTankCollide(Rect bounding_box, JoyDirection direction); // 带方向坦克的碰撞
+    bool isEagleHurt(Rect bounding_box);
 };
 
 #endif /* _BATTLE_FIELD_H_ */

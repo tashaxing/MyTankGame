@@ -41,9 +41,10 @@ private:
     void emitEnemyBullet(float tm);
     Vector<Bullet*> m_enemy_bullets; // 场景中敌人的子弹
     
-    Vector<Enemy*> m_enemies;
+    Vector<Enemy*> m_enemies; // 场景中的敌人
     void generateEnemy(float tm);
     
+    Vector<Item*> m_items; // 场景中的道具
     void generateItem();
     
     BattleField* m_battle_field;

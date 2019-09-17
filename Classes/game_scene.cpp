@@ -226,12 +226,47 @@ void GameScene::emitEnemyBullet(float tm)
 
 void GameScene::generateItem()
 {
+    SimpleAudioEngine::getInstance()->playEffect("sound/tbonushit.wav");
     
+    Size map_size = m_battle_field->getContentSize();
+    Size map_array = m_battle_field->getMapSize();
+    // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
+    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+    
+    // 随机类型
+    ItemType item_type;
+    float item_type_factor = CCRANDOM_0_1();
+    if (item_type_factor < 1.0 / 6)
+        item_type = ACTIVE;
+    else if (item_type_factor >= 1.0 / 6 && item_type_factor < 2.0 / 6)
+        item_type = STAR;
+    else if (item_type_factor >= 2.0 / 6 && item_type_factor < 3.0 / 6)
+        item_type = BOMB;
+    else if (item_type_factor >= 3.0 / 6 && item_type_factor < 4.0 / 6)
+        item_type = SHOVEL;
+    else if (item_type_factor >= 4.0 / 6 && item_type_factor < 5.0 / 6)
+        item_type = TIMER;
+    else
+        item_type = MINITANK;
+    
+    Item* item = Item::create();
+    item->initWithType(item_type);
+    
+    // 随机位置
+    float item_posx_factor = CCRANDOM_0_1();
+    float pos_x = m_battle_field->getPositionX() + (map_size.width - tile_size.width * 2) * item_posx_factor;
+    float item_posy_factor = CCRANDOM_0_1();
+    float pos_y = m_battle_field->getPositionY() + (map_size.height - tile_size.height * 2) * item_posy_factor;
+    item->setPosition(pos_x, pos_y);
+    
+    addChild(item, kItemZorder);
+    m_items.pushBack(item);
 }
 
 void GameScene::gameOver()
 {
     CCLOG("game over");
+    SimpleAudioEngine::getInstance()->playEffect("sound/gameover.wav", false);
     m_is_over = true;
 }
 
@@ -240,6 +275,29 @@ void GameScene::update(float dt)
 //    CCLOG("update delta: %f", dt);
     
     // ==== 碰撞检测 ====
+    // --- 老鹰e被子弹击中 ---
+    if (!m_is_over)
+    {
+        for (Bullet* bullet : m_enemy_bullets)
+        {
+            if (m_battle_field->isEagleHurt(bullet->getBoundingBox()))
+            {
+                gameOver();
+                m_player1->m_moving = false;
+                return;
+            }
+        }
+        
+        for (Bullet* bullet : m_player_bullets)
+        {
+            if (m_battle_field->isEagleHurt(bullet->getBoundingBox()))
+            {
+                gameOver();
+                return;
+            }
+        }
+    }
+    
     // --- 玩家被子弹击中 ---
     if (!m_is_over)
     {
@@ -251,10 +309,13 @@ void GameScene::update(float dt)
                 
                 m_player_bullets.eraseObject(bullet);
                 bullet->removeFromParent();
-                m_player1->destroy();
+                m_player1->destroy(); // 此处玩家坦克已销毁，后续不再判断其碰撞
                 
                 if (m_player1_life == 0)
+                {
                     gameOver();
+                    return;
+                }
                 else
                 {
                     // 加载玩家坦克
@@ -287,6 +348,12 @@ void GameScene::update(float dt)
                 && bullet->getBoundingBox().intersectsRect(enemy->getBoundingBox()))
             {
                 enemy->hit();
+                
+                // 击中敌人爆装备
+                if (enemy->m_type == ARMOR)
+                    generateItem();
+                
+                // 敌人生命值减到0则死亡
                 if (enemy->m_life == 0)
                 {
                     enemy->die();
@@ -315,7 +382,6 @@ void GameScene::update(float dt)
             bullet->removeFromParent();
         }
     }
-    
     
     for (Bullet* bullet : m_enemy_bullets)
     {
@@ -347,22 +413,47 @@ void GameScene::update(float dt)
     }
     
     // --- 玩家遇到砖块时停止移动 ---
-    if (m_battle_field->isTankCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
+    if (!m_is_over)
     {
-        CCLOG("player can not move");
-        m_player1->m_moving = false;
-    }
-    else
-    {
-        CCLOG("player can move");
-        m_player1->m_moving = true;
+        if (m_battle_field->isTankCollide(m_player1->getBoundingBox(), m_player1->m_head_direction))
+        {
+            CCLOG("player can not move");
+            m_player1->m_moving = false;
+        }
+        else
+        {
+            CCLOG("player can move");
+            m_player1->m_moving = true;
+        }
     }
     
     // --- 玩家碰到敌人坦克时停止移动 ---
-    
+    if (!m_is_over)
+    {
+        for (Enemy* enemy : m_enemies)
+        {
+            if (m_player1->getBoundingBox().intersectsRect(enemy->getBoundingBox()))
+            {
+                CCLOG("player can not move");
+                m_player1->m_moving = false;
+                break;
+            }
+        }
+    }
     
     // --- 玩家坦克拾取道具 ---
-    
+    if (!m_is_over)
+    {
+        for (Item* item : m_items)
+        {
+            if (m_player1->getBoundingBox().intersectsRect(item->getBoundingBox()))
+            {
+                m_player1->fetchItem(item->m_type);
+                m_items.eraseObject(item);
+                item->removeFromParent();
+            }
+        }
+    }
 }
 
 void GameScene::onEnter()
