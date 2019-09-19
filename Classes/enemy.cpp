@@ -191,7 +191,6 @@ void Enemy::changeDirection()
 {
     // 随机变换方向
     float tank_direction_factor = CCRANDOM_0_1();
-//    float tank_direction_factor = rand() % 100 / 100.0;
     if (tank_direction_factor < 0.25)
         setDirection(UP);
     else if (tank_direction_factor >= 0.25 && tank_direction_factor < 0.5)

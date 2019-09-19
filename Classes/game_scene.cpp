@@ -275,13 +275,14 @@ void GameScene::update(float dt)
 //    CCLOG("update delta: %f", dt);
     
     // ==== 碰撞检测 ====
-    // --- 老鹰e被子弹击中 ---
+    // --- 老鹰总部被子弹击中 ---
     if (!m_is_over)
     {
         for (Bullet* bullet : m_enemy_bullets)
         {
             if (m_battle_field->isEagleHurt(bullet->getBoundingBox()))
             {
+                SimpleAudioEngine::getInstance()->playEffect("sound/fexplosion.wav");
                 gameOver();
                 m_player1->m_moving = false;
                 return;
@@ -292,7 +293,9 @@ void GameScene::update(float dt)
         {
             if (m_battle_field->isEagleHurt(bullet->getBoundingBox()))
             {
-                gameOver();
+                SimpleAudioEngine::getInstance()->playEffect("sound/fexplosion.wav");
+//                gameOver();
+                m_player1->m_moving = false;
                 return;
             }
         }
@@ -403,7 +406,7 @@ void GameScene::update(float dt)
         {
             CCLOG("enemy can not move");
             enemy->m_moving = false;
-            enemy->changeDirection();
+//            enemy->changeDirection();
         }
         else
         {
