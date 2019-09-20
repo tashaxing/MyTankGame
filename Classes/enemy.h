@@ -14,6 +14,12 @@ enum EnemyType
     SPEED    // 迅捷坦克
 };
 
+enum EnemyStatus
+{
+    ESIMPLE, // 普通
+    ESHIELD  // 无敌
+};
+
 class Enemy : public Sprite
 {
 public:
@@ -36,6 +42,7 @@ public:
     
     EnemyType m_type;
     bool m_moving;
+    EnemyStatus m_status;
     
 private:
     Size m_size;

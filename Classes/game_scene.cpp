@@ -76,7 +76,7 @@ bool GameScene::init()
     // 关卡显示，加关卡数字
     Sprite* level_splash = Sprite::create("img/menu/level.png");
     level_splash->setContentSize(visible_size);
-    
+
     Label* level_numer = Label::createWithTTF(std::to_string(m_round),
                                               "fonts/arial.ttf",
                                               14);
@@ -87,11 +87,11 @@ bool GameScene::init()
     level_splash->setPosition(visible_origin.x + visible_size.width / 2,
                               visible_origin.y + visible_size.height / 2);
     addChild(level_splash, kLevelSplashZorder);
-    
+
     // 播放动画，关卡显示消失
     auto move_by = MoveBy::create(0.3, Vec2(0, visible_size.height));
     level_splash->runAction(Sequence::create(DelayTime::create(1.0), move_by, NULL)); // FIXME: remove in callback
-    
+
     // 默认渲染更新
     scheduleUpdate();
     
@@ -154,7 +154,7 @@ void GameScene::generateEnemy(float tm)
     Size map_array = m_battle_field->getMapSize();
     // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
     Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
-    
+
     // 根据概率生成敌方坦克
     float tank_type_factor = CCRANDOM_0_1();
     EnemyType enemy_type;
@@ -294,7 +294,7 @@ void GameScene::update(float dt)
             if (m_battle_field->isEagleHurt(bullet->getBoundingBox()))
             {
                 SimpleAudioEngine::getInstance()->playEffect("sound/fexplosion.wav");
-//                gameOver();
+                gameOver();
                 m_player1->m_moving = false;
                 return;
             }
@@ -406,7 +406,7 @@ void GameScene::update(float dt)
         {
             CCLOG("enemy can not move");
             enemy->m_moving = false;
-//            enemy->changeDirection();
+            enemy->changeDirection();
         }
         else
         {

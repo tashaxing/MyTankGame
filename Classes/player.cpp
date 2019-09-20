@@ -147,7 +147,7 @@ Bullet* Player::shootSingle()
     // 发射子弹音效
     SimpleAudioEngine::getInstance()->playEffect("sound/shoot.wav");
     
-    // 子弹从飞机头部打出来
+    // 子弹从坦克头部打出来
     Bullet* bullet = Bullet::create();
     bullet->initWithDirection(m_head_direction);
     switch (m_head_direction)
@@ -179,7 +179,23 @@ void Player::fetchItem(ItemType item_type)
 {
     SimpleAudioEngine::getInstance()->playEffect("sound/bonus.wav");
     // 拾取不同道具，产生不同影响
-    
+    switch (item_type)
+    {
+        case ACTIVE:
+            break;
+        case STAR:
+            
+            break;
+        case BOMB:
+            break;
+        case SHOVEL:
+            break;
+        case TIMER:
+            break;
+        case MINITANK:
+            
+            break;
+    }
 }
 
 void Player::destroy()

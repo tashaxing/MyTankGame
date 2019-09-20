@@ -41,10 +41,11 @@ public:
     JoyDirection m_head_direction; // 坦克朝向
     float m_bullet_interval;
     bool m_moving;
+    PlayerStatus m_status;
     
 private:
     Size m_size;
-    PlayerStatus m_status;
+    
     BulletType m_bullet_type; // 根据子弹类型改变子弹
 };
 

@@ -58,7 +58,7 @@ bool WelcomeScene::init()
     Animation* enemy_born_animation = Animation::create();
     for (int i = 1; i <= 4; i++)
         enemy_born_animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("born" + std::to_string(i) + ".png"));
-    enemy_born_animation->setDelayPerUnit(1.0);
+    enemy_born_animation->setDelayPerUnit(0.2);
     AnimationCache::getInstance()->addAnimation(enemy_born_animation, "enemy_born_animation");
     
     // 添加开始游戏按钮

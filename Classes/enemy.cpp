@@ -40,32 +40,18 @@ void Enemy::initWithType(EnemyType enemy_type)
     // 初始方向
     m_head_direction = DOWN;
     
-    // 初始可移动
-    m_moving = true;
+    // 初始不可移动
+    m_moving = false;
+    
+    // 初始状态
+    m_status = ESHIELD;
     
     // 播放出生动画
     Animate* enemy_born_animation = Animate::create(AnimationCache::getInstance()->getAnimation("enemy_born_animation"));
     runAction(Sequence::create(enemy_born_animation, CallFunc::create([&](){
-        
-        // 根据纹理初始化不同的坦克
-        switch (enemy_type)
-        {
-            case NORMAL:
-                setTexture("img/tank/normal/normalD.png"); // 设置纹理必须用单个图片而不是帧缓存
-                m_speed = kMoveSpeedNormal;
-                break;
-            case ARMOR:
-                setTexture("img/tank/armor/armor3D.png");
-                m_speed = kMoveSpeedArmor;
-                break;
-            case SPEED:
-                setTexture("img/tank/speed/speedD.png");
-                m_speed = kMoveSpeedFast;
-                break;
-            default:
-                break;
-        }
-        setContentSize(m_size); // 重设尺寸（由于是异步，此时m_size已经被设置过）
+        m_status = ESIMPLE; // 动画完毕才能接收伤害
+        m_moving = true;
+        changeDirection(); // 根据方向切换纹理
     }), NULL) );
     
     // 调度坦克移动
@@ -190,6 +176,9 @@ void Enemy::move(float tm)
 void Enemy::changeDirection()
 {
     // 随机变换方向
+    if (m_status == ESHIELD)
+        return;
+        
     float tank_direction_factor = CCRANDOM_0_1();
     if (tank_direction_factor < 0.25)
         setDirection(UP);
@@ -203,7 +192,7 @@ void Enemy::changeDirection()
 
 Bullet* Enemy::shoot()
 {
-    // 子弹从飞机头部打出来
+    // 子弹从坦克头部打出来
     Bullet* bullet = Bullet::create();
     bullet->initWithDirection(m_head_direction);
     switch (m_head_direction)

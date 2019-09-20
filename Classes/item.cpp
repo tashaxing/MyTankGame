@@ -38,6 +38,6 @@ void Item::initWithType(ItemType item_type)
     }
     
     // 闪烁动画
-    Blink* blink = Blink::create(120.0, 120); // 每1秒闪动一次，无限次
+    Blink* blink = Blink::create(120.0, 120); // 每1秒闪动一次，持续两分钟
     runAction(blink);
 }
