@@ -14,7 +14,8 @@ enum TileType
     STEEL,
     WALL,
     RIVER,
-    EAGLE
+    EAGLE,
+    DEAD_EAGLE
 };
 
 class BattleField : public TMXTiledMap
@@ -29,6 +30,9 @@ public:
     bool isBulletCollide(Rect bounding_box, BulletType bullet_type); // 子弹的碰撞
     bool isTankCollide(Rect bounding_box, JoyDirection direction); // 带方向坦克的碰撞
     bool isEagleHurt(Rect bounding_box);
+    
+    void protectEagle(); // 用钢板把老鹰围起来
+    void unprotectEagle(); // 老鹰恢复为土砖围起来
 };
 
 #endif /* _BATTLE_FIELD_H_ */

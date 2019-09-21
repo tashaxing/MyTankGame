@@ -10,7 +10,7 @@ enum ItemType
     STAR,  // 火力星
     BOMB,   // 炸弹
     SHOVEL,  // 铲子
-    TIMER,  // 定时
+    CLOCK,  // 定时
     MINITANK // 命
 };
 

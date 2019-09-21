@@ -1,5 +1,6 @@
 #include <SimpleAudioEngine.h>
 #include "player.h"
+#include "game_scene.h"
 
 using namespace CocosDenshion;
 
@@ -37,8 +38,10 @@ void Player::initWithType(PlayerType player_type)
     // 初始状态是无敌
     m_status = SHIELD;
     
+    // 初始火力
+    m_weapon = SINGLE_GUN;
+    
     // 初始子弹
-    m_bullet_type = BASE;
     m_bullet_interval = kBulletInterval;
     
     // 初始不在移动状态
@@ -68,6 +71,11 @@ void Player::initWithType(PlayerType player_type)
         }
         setContentSize(m_size); // 重设尺寸（由于是异步，此时m_size已经被设置过）
     }), NULL) );
+}
+
+void Player::setGameScene(GameScene* game_scene)
+{
+    m_game_scene = game_scene;
 }
 
 void Player::setSize(Size size)
@@ -172,13 +180,49 @@ Bullet* Player::shootSingle()
 }
 Vector<Bullet*> Player::shootDouble()
 {
-    return Vector<Bullet*>();
+    // 发射子弹音效
+    SimpleAudioEngine::getInstance()->playEffect("sound/shoot.wav");
+    
+    Vector<Bullet*> double_bullets;
+    for (int i = 0; i < 2; i++)
+    {
+        // 子弹从坦克头部打出来
+        float bullet_distance = 20.0;
+        Bullet* bullet = Bullet::create();
+        bullet->initWithDirection(m_head_direction);
+        bullet->m_type = POWER; // 火力增强子弹
+        switch (m_head_direction)
+        {
+            case UP:
+                bullet->setPosition(getPositionX(),
+                                    getPositionY() + getContentSize().height / 2 + i * bullet_distance);
+                break;
+            case DOWN:
+                bullet->setPosition(getPositionX(),
+                                    getPositionY() - getContentSize().height / 2 - i * bullet_distance);
+                break;
+            case LEFT:
+                bullet->setPosition(getPositionX() - getContentSize().width / 2 - i * bullet_distance,
+                                    getPositionY());
+                break;
+            case RIGHT:
+                bullet->setPosition(getPositionX() + getContentSize().width / 2 + i * bullet_distance,
+                                    getPositionY());
+                break;
+            default:
+                break;
+        }
+        
+        double_bullets.pushBack(bullet);
+    }
+    
+    return double_bullets;
 }
 
 void Player::fetchItem(ItemType item_type)
 {
     SimpleAudioEngine::getInstance()->playEffect("sound/bonus.wav");
-    // 拾取不同道具，产生不同影响
+    // 拾取不同道具，产生不同影响，有些需要调用游戏主场景回调函数
     switch (item_type)
     {
         case ACTIVE:
@@ -211,16 +255,24 @@ void Player::fetchItem(ItemType item_type)
         }
             break;
         case STAR:
-            
+            // 进入双子弹状态
+            m_weapon = DOUBLE_GUN;
             break;
         case BOMB:
+            if (m_game_scene)
+                m_game_scene->onBomb();
             break;
         case SHOVEL:
+            if (m_game_scene)
+                m_game_scene->onShovel();
             break;
-        case TIMER:
+        case CLOCK:
+            if (m_game_scene)
+                m_game_scene->onClock();
             break;
         case MINITANK:
-            
+            if (m_game_scene)
+                m_game_scene->onMiniTank();
             break;
     }
 }

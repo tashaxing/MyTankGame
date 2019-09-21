@@ -27,6 +27,12 @@ public:
 	void onEnumDirection(JoyDirection direction); // 控制摇杆方向回调，枚举值
 	void onAngleDirection(float angle); // 控制摇杆方向回调，任意角度
 	void onFireBtn(bool is_pressed);
+    
+    void onBomb(); // 玩家拾取到炸弹，当前所有敌人消灭
+    void onClock(); // 玩家拾取到定时，所有敌人坦克无法移动和开火
+    void onShovel(); // 玩家拾取到铲子，老鹰碉堡搞成钢板围起来
+    void onMiniTank(); // 玩家拾取到命，增加一条命
+    
     int m_round = 1; // 第几关，默认第一关
     
 private:

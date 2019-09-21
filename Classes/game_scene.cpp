@@ -53,6 +53,7 @@ bool GameScene::init()
     // 加载玩家坦克
     m_player1 = Player::create();
     m_player1->initWithType(P1);
+    m_player1->setGameScene(this);
     m_player1->setSize(tile_size * 2 * kTankSizeFactor); // should fit tile size
     m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 4,
                            m_battle_field->getPositionY() + tile_size.height); // 注意一个大方块由4个小方块拼成
@@ -128,12 +129,24 @@ void GameScene::onFireBtn(bool is_pressed)
         if (is_pressed)
         {
             // TODO: every moment make sure only limit number bullets in the screen
-            // FIXME: timer would wait at least one delay interval, here shoot a bullet at one
+            // FIXME: timer would wait at least one delay interval, here shoot a bullet at one btn click
             if (m_player_bullets.empty())
             {
-                Bullet* bullet = m_player1->shootSingle();
-                addChild(bullet, kMapZorder);
-                m_player_bullets.pushBack(bullet);
+                if (m_player1->m_weapon == SINGLE_GUN)
+                {
+                    Bullet* bullet = m_player1->shootSingle();
+                    addChild(bullet, kMapZorder);
+                    m_player_bullets.pushBack(bullet);
+                }
+                else if (m_player1->m_weapon == DOUBLE_GUN)
+                {
+                    Vector<Bullet*> double_bullets = m_player1->shootDouble();
+                    for (Bullet* bullet : double_bullets)
+                    {
+                        addChild(bullet, kMapZorder);
+                        m_player_bullets.pushBack(bullet);
+                    }
+                }
             }
             
             schedule(schedule_selector(GameScene::emitPlayerBullet), m_player1->m_bullet_interval);
@@ -143,6 +156,32 @@ void GameScene::onFireBtn(bool is_pressed)
             
         pre_press_status = is_pressed;
     }
+}
+
+void GameScene::onBomb()
+{
+    SimpleAudioEngine::getInstance()->playEffect("sound/eexplosion.wav");
+    for (Enemy* enemy : m_enemies)
+    {
+//        enemy->die();
+        m_enemies.eraseObject(enemy);
+        enemy->removeFromParent();
+    }
+}
+
+void GameScene::onClock()
+{
+    
+}
+
+void GameScene::onShovel()
+{
+    m_battle_field->protectEagle();
+}
+
+void GameScene::onMiniTank()
+{
+    m_player1_life++;
 }
 
 void GameScene::generateEnemy(float tm)
@@ -201,9 +240,21 @@ void GameScene::emitPlayerBullet(float tm)
     // 小技巧，如果子弹消失了则快速发射一颗，所以子弹发射频率会随着碰撞调整
     if (m_player_bullets.empty())
     {
-        Bullet* bullet = m_player1->shootSingle();
-        addChild(bullet, kMapZorder);
-        m_player_bullets.pushBack(bullet);
+        if (m_player1->m_weapon == SINGLE_GUN)
+        {
+            Bullet* bullet = m_player1->shootSingle();
+            addChild(bullet, kMapZorder);
+            m_player_bullets.pushBack(bullet);
+        }
+        else if (m_player1->m_weapon == DOUBLE_GUN)
+        {
+            Vector<Bullet*> double_bullets = m_player1->shootDouble();
+            for (Bullet* bullet : double_bullets)
+            {
+                addChild(bullet, kMapZorder);
+                m_player_bullets.pushBack(bullet);
+            }
+        }
     }
 }
 
@@ -245,7 +296,7 @@ void GameScene::generateItem()
     else if (item_type_factor >= 3.0 / 6 && item_type_factor < 4.0 / 6)
         item_type = SHOVEL;
     else if (item_type_factor >= 4.0 / 6 && item_type_factor < 5.0 / 6)
-        item_type = TIMER;
+        item_type = CLOCK;
     else
         item_type = MINITANK;
     
@@ -308,33 +359,38 @@ void GameScene::update(float dt)
         {
             if (m_player1->getBoundingBox().intersectsRect(bullet->getBoundingBox()))
             {
-                CCLOG("player1 destroyed");
-                
-                m_player_bullets.eraseObject(bullet);
+                // 消除子弹
+                m_enemy_bullets.eraseObject(bullet);
                 bullet->removeFromParent();
-                m_player1->destroy(); // 此处玩家坦克已销毁，后续不再判断其碰撞
                 
-                if (m_player1_life == 0)
+                // 只有普通模式会生效，无敌模式不管
+                if (m_player1->m_status == SIMPLE)
                 {
-                    gameOver();
-                    return;
-                }
-                else
-                {
-                    // 加载玩家坦克
-                    Size map_size = m_battle_field->getContentSize();
-                    Size map_array = m_battle_field->getMapSize();
-                    // tmx地图的方格必须用行列值重新计算，getTileSize()拿到的值应该是大方块的尺寸，不准确的
-                    Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+                    m_player1->destroy(); // 此处玩家坦克已销毁，后续不再判断其碰撞
                     
-                    m_player1 = Player::create();
-                    m_player1->initWithType(P1);
-                    m_player1->setSize(tile_size * 2 * kTankSizeFactor); // should fit tile size
-                    m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 4,
-                                           m_battle_field->getPositionY() + tile_size.height); // 注意一个大方块由4个小方块拼成
-                    addChild(m_player1, kMapZorder);
-                    
-                    m_player1_life--;
+                    if (m_player1_life == 0)
+                    {
+                        gameOver();
+                        return;
+                    }
+                    else
+                    {
+                        // 加载玩家坦克
+                        Size map_size = m_battle_field->getContentSize();
+                        Size map_array = m_battle_field->getMapSize();
+                        // tmx地图的方格必须用行列值重新计算，getTileSize()拿到的值应该是大方块的尺寸，不准确的
+                        Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+                        
+                        m_player1 = Player::create();
+                        m_player1->initWithType(P1);
+                        m_player1->setGameScene(this);
+                        m_player1->setSize(tile_size * 2 * kTankSizeFactor); // should fit tile size
+                        m_player1->setPosition(m_battle_field->getPositionX() + map_size.width / 2 - tile_size.width * 4,
+                                               m_battle_field->getPositionY() + tile_size.height); // 注意一个大方块由4个小方块拼成
+                        addChild(m_player1, kMapZorder);
+                        
+                        m_player1_life--;
+                    }
                 }
             }
         }
@@ -396,6 +452,35 @@ void GameScene::update(float dt)
     {
         m_enemy_bullets.eraseObject(bullet);
         bullet->removeFromParent();
+    }
+    hit_bullets.clear();
+    
+    // --- 玩家子弹跟敌人子弹抵消 ---
+    for (Bullet* player_bullet : m_player_bullets)
+    {
+        for (Bullet* enemy_bullet : m_enemy_bullets)
+        {
+            if (player_bullet->getBoundingBox().intersectsRect(enemy_bullet->getBoundingBox()))
+            {
+                hit_bullets.pushBack(enemy_bullet);
+                hit_bullets.pushBack(player_bullet);
+                break;
+            }
+        }
+    }
+    for (Bullet* bullet : hit_bullets)
+    {
+        if (m_enemy_bullets.contains(bullet))
+        {
+            m_enemy_bullets.eraseObject(bullet);
+            bullet->removeFromParent();
+        }
+        
+        if (m_player_bullets.contains(bullet))
+        {
+            m_player_bullets.eraseObject(bullet);
+            bullet->removeFromParent();
+        }
     }
     hit_bullets.clear();
     

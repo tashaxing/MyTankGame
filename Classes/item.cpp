@@ -27,7 +27,7 @@ void Item::initWithType(ItemType item_type)
         case SHOVEL:
             setTexture("img/item/shovel.png");
             break;
-        case TIMER:
+        case CLOCK:
             setTexture("img/item/timer.png");
             break;
         case MINITANK:

@@ -10,8 +10,20 @@ const TileType kTileHash[] = {
     BLANK, BLANK, GRASS, GRASS, STEEL, STEEL,
     WALL, WALL, RIVER, RIVER, EAGLE, EAGLE,
     WALL, WALL, RIVER, RIVER, EAGLE, EAGLE,
-    EAGLE, EAGLE, BLANK, BLANK, BLANK, BLANK,
-    EAGLE, EAGLE, BLANK, BLANK, BLANK, BLANK
+    DEAD_EAGLE, DEAD_EAGLE, BLANK, BLANK, BLANK, BLANK, // 25, 26
+    DEAD_EAGLE, DEAD_EAGLE, BLANK, BLANK, BLANK, BLANK  // 31, 32
+};
+
+// 老鹰周围砖块坐标
+const Vec2 kEagleFence[] = {
+    Vec2(11, 25),
+    Vec2(11, 24),
+    Vec2(11, 23),
+    Vec2(12, 23),
+    Vec2(13, 23),
+    Vec2(14, 23),
+    Vec2(14, 24),
+    Vec2(14, 25)
 };
 
 bool BattleField::init()
@@ -327,7 +339,34 @@ bool BattleField::isEagleHurt(Rect bounding_box)
         || kTileHash[left_up_gid] == EAGLE
         || kTileHash[right_down_gid] == EAGLE
         || kTileHash[right_up_gid] == EAGLE)
+    {
+        // 老鹰塌掉
+        layer0->setTileGID(25, Vec2(12, 24));
+        layer0->setTileGID(26, Vec2(13, 24));
+        layer0->setTileGID(31, Vec2(12, 25));
+        layer0->setTileGID(32, Vec2(13, 25));
+        
         return true;
+    }
+    
 
     return false;
+}
+
+void BattleField::protectEagle()
+{
+    TMXLayer* layer0 = getLayer("layer_0");
+    
+    // 根据坐标改变砖块为钢板
+    for (Vec2 cordinate : kEagleFence)
+        layer0->setTileGID(5, cordinate);
+}
+
+void BattleField::unprotectEagle()
+{
+    TMXLayer* layer0 = getLayer("layer_0");
+    
+    // 根据坐标改变砖块为土砖
+    for (Vec2 cordinate : kEagleFence)
+        layer0->setTileGID(13, cordinate);
 }

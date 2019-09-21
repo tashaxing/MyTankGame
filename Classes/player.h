@@ -20,6 +20,14 @@ enum PlayerStatus
     SHIELD  // 无敌
 };
 
+enum PlayerWeapon
+{
+    SINGLE_GUN,
+    DOUBLE_GUN
+};
+
+class GameScene;
+
 class Player : public Sprite
 {
 public:
@@ -29,6 +37,7 @@ public:
     
 public:
     void initWithType(PlayerType player_type);
+    void setGameScene(GameScene* game_scene);
     void move(float tm);
     Bullet* shootSingle(); // 射击一次，产生一颗子弹
     Vector<Bullet*> shootDouble(); // 射击一次，产生双子弹
@@ -42,11 +51,11 @@ public:
     float m_bullet_interval;
     bool m_moving;
     PlayerStatus m_status;
+    PlayerWeapon m_weapon;
     
 private:
+    GameScene* m_game_scene = nullptr; // like callback
     Size m_size;
-    
-    BulletType m_bullet_type; // 根据子弹类型改变子弹
 };
 
 #endif /* _PLAYER_H_ */
