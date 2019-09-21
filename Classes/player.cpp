@@ -182,6 +182,33 @@ void Player::fetchItem(ItemType item_type)
     switch (item_type)
     {
         case ACTIVE:
+        {
+            // 进入无敌模式
+            m_status = SHIELD;
+            Animate* player_born_anim = Animate::create(AnimationCache::getInstance()->getAnimation("player_born_animation"));
+            runAction(Sequence::create(Repeat::create(player_born_anim, 20), CallFunc::create([&](){
+                m_status = SIMPLE; // 无敌时间过后就回归正常
+                
+                switch (m_head_direction)
+                {
+                    case UP:
+                        setTexture("img/tank/player1/player1U.png");
+                        break;
+                    case DOWN:
+                        setTexture("img/tank/player1/player1D.png");
+                        break;
+                    case LEFT:
+                        setTexture("img/tank/player1/player1L.png");
+                        break;
+                    case RIGHT:
+                        setTexture("img/tank/player1/player1R.png");
+                        break;
+                    default:
+                        break;
+                }
+                setContentSize(m_size); // 重设尺寸（由于是异步，此时m_size已经被设置过）
+            }), NULL) );
+        }
             break;
         case STAR:
             

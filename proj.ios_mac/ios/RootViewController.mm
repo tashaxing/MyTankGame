@@ -53,7 +53,7 @@
                                      numberOfSamples: cocos2d::GLViewImpl::_multisamplingCount ];
     
     // Enable or disable multiple touches
-    [eaglView setMultipleTouchEnabled:NO];
+    [eaglView setMultipleTouchEnabled:YES]; // 这里手动开启多点触控
     
     // Set EAGLView as view of RootViewController
     self.view = eaglView;

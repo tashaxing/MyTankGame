@@ -2,11 +2,8 @@
 #define _JOYPAD_H_
 
 #include "cocos2d.h"
-#include "ui/CocosGUI.h"
-
 
 using namespace cocos2d;
-using namespace ui; // button namespace
 
 // 摇杆类型，四方向、八方向、任意方向
 enum JoystickType
@@ -39,9 +36,9 @@ public:
     virtual bool init();
     CREATE_FUNC(Joypad);
     
-    virtual bool onTouchBegan(Touch *touch, Event *event);
-    virtual void onTouchMoved(Touch *touch, Event *event);
-    virtual void onTouchEnded(Touch *touch, Event *event);
+    virtual void onTouchesBegan(const std::vector<Touch*>& touches, Event* event);
+    virtual void onTouchesMoved(const std::vector<Touch*>& touches, Event* event);
+    virtual void onTouchesEnded(const std::vector<Touch*>& touches, Event* event);
     
     void setJoystickType(JoystickType joystick_type);
     void setGameScene(GameScene* game_scene);
@@ -52,7 +49,7 @@ private:
     Vec2 getAnglePosition(float R, float rad);
     Sprite* m_wheel;
     Sprite* m_stick;
-    Button* m_attack;
+    Sprite* m_attack;
     bool m_can_move;
 
     bool m_direction_status; // 方向键按下
