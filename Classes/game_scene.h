@@ -14,7 +14,7 @@ using namespace cocos2d;
 class GameScene : public Layer
 {
 public:
-    static Scene* createScene();
+    static Scene* createScene(int round = 1);
     virtual bool init();
     virtual void onEnter();
     virtual void onExit();
@@ -22,7 +22,9 @@ public:
     virtual void update(float dt);
     
     CREATE_FUNC(GameScene);
-
+private:
+    void initWithRound(int round = 1);
+    
 public:
 	void onEnumDirection(JoyDirection direction); // 控制摇杆方向回调，枚举值
 	void onAngleDirection(float angle); // 控制摇杆方向回调，任意角度
@@ -34,8 +36,10 @@ public:
     void onMiniTank(); // 玩家拾取到命，增加一条命
     
     int m_round = 1; // 第几关，默认第一关
+    int m_enemy_count = 20; // 每关20个
     
 private:
+    void gameWin();
     void gameOver();
     bool m_is_over;
     int m_player1_life = 2; // 初始生命值

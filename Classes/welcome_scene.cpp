@@ -34,6 +34,7 @@ bool WelcomeScene::init()
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("img/tank/blast.plist", "img/tank/blast/blast.png");
     
     SimpleAudioEngine::getInstance()->preloadBackgroundMusic("sound/levelstarting.wav");
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("sound/gamewin.wav");
     SimpleAudioEngine::getInstance()->preloadBackgroundMusic("sound/gameover.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/bonus.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/brickhit.wav");
@@ -43,7 +44,6 @@ bool WelcomeScene::init()
     SimpleAudioEngine::getInstance()->preloadEffect("sound/life.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/moving.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/nmoving.wav");
-    SimpleAudioEngine::getInstance()->preloadEffect("sound/pause.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/shieldhit.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/shoot.wav");
     SimpleAudioEngine::getInstance()->preloadEffect("sound/steelhit.wav");

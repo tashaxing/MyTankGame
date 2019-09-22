@@ -15,10 +15,12 @@ const float kTankSizeFactor = 0.8;
 const int kEnemyBatchTankCount = 4;
 const float kEnemyGenerateInterval = 5.0;
 
-Scene* GameScene::createScene()
+Scene* GameScene::createScene(int round)
 {
-    Scene *game_scene = Scene::create();
-    Layer *game_layer = GameScene::create();
+    Scene* game_scene = Scene::create();
+    GameScene* game_layer = GameScene::create();
+    game_layer->initWithRound(round);
+    
     game_scene->addChild(game_layer);
     return game_scene;
 }
@@ -28,6 +30,12 @@ bool GameScene::init()
     if (!Layer::init())
         return false;
     
+    return true;
+}
+
+void GameScene::initWithRound(int round)
+{
+    m_round = round;
     CCLOG("=== start level %d ===", m_round);
     
     // 初始化游戏标志
@@ -77,7 +85,7 @@ bool GameScene::init()
     // 关卡显示，加关卡数字
     Sprite* level_splash = Sprite::create("img/menu/level.png");
     level_splash->setContentSize(visible_size);
-
+    
     Label* level_numer = Label::createWithTTF(std::to_string(m_round),
                                               "fonts/arial.ttf",
                                               14);
@@ -88,15 +96,13 @@ bool GameScene::init()
     level_splash->setPosition(visible_origin.x + visible_size.width / 2,
                               visible_origin.y + visible_size.height / 2);
     addChild(level_splash, kLevelSplashZorder);
-
+    
     // 播放动画，关卡显示消失
     auto move_by = MoveBy::create(0.3, Vec2(0, visible_size.height));
     level_splash->runAction(Sequence::create(DelayTime::create(1.0), move_by, NULL)); // FIXME: remove in callback
-
+    
     // 默认渲染更新
     scheduleUpdate();
-    
-    return true;
 }
 
 void GameScene::onEnumDirection(JoyDirection direction)
@@ -164,9 +170,10 @@ void GameScene::onBomb()
     for (Enemy* enemy : m_enemies)
     {
 //        enemy->die();
-        m_enemies.eraseObject(enemy);
+        m_enemy_count--; // 敌人坦克减少
         enemy->removeFromParent();
     }
+    m_enemies.clear(); // 这里统一清除
 }
 
 void GameScene::onClock()
@@ -314,16 +321,35 @@ void GameScene::generateItem()
     m_items.pushBack(item);
 }
 
+void GameScene::gameWin()
+{
+    CCLOG("game win");
+    
+    SimpleAudioEngine::getInstance()->playBackgroundMusic("sound/gamewin.wav", false);
+    
+    // 延时一会儿再切换关卡
+    int next_round = m_round + 1; // mod, // 关卡提升
+    Scene* scene = GameScene::createScene(next_round);
+    TransitionScene* transition_scene = TransitionFade::create(0.5, scene);
+    Director::getInstance()->replaceScene(transition_scene);
+}
+
 void GameScene::gameOver()
 {
     CCLOG("game over");
     SimpleAudioEngine::getInstance()->playEffect("sound/gameover.wav", false);
     m_is_over = true;
+    
+    // 游戏结束的标签
 }
 
 void GameScene::update(float dt)
 {
 //    CCLOG("update delta: %f", dt);
+    
+    // 判断游戏胜利
+    if (m_enemy_count <= 0)
+        gameWin();
     
     // ==== 碰撞检测 ====
     // --- 老鹰总部被子弹击中 ---
@@ -417,6 +443,7 @@ void GameScene::update(float dt)
                 {
                     enemy->die();
                     m_enemies.eraseObject(enemy);
+                    m_enemy_count--; // 敌人坦克减少
                     enemy->removeFromParent();
                 }
                 

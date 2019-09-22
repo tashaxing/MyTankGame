@@ -25,7 +25,7 @@ void Item::initWithType(ItemType item_type)
             setTexture("img/item/bomb.png");
             break;
         case SHOVEL:
-            setTexture("img/item/shovel.png");
+            setTexture("img/item/steel.png");
             break;
         case CLOCK:
             setTexture("img/item/timer.png");

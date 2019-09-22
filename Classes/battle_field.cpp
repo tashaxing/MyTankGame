@@ -81,7 +81,6 @@ bool BattleField::isBulletCollide(Rect bounding_box, BulletType bullet_type)
     // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
     Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
     
-    
     // 不能出界
     if (bounding_box.getMinX() <= 0.1 || bounding_box.getMaxX() >= map_size.width - 0.1
         || bounding_box.getMinY() <= 0.1 || bounding_box.getMaxY() >= map_size.height - 0.1)
@@ -309,6 +308,14 @@ bool BattleField::isEagleHurt(Rect bounding_box)
     Size map_array = getMapSize();
     // tmx地图的方格必须用行列值重新计算，getTileSize()是不准确的
     Size tile_size = Size(map_size.width / map_array.width, map_size.height / map_array.height);
+    
+    // 不能出界
+    if (bounding_box.getMinX() <= 0.1 || bounding_box.getMaxX() >= map_size.width - 0.1
+        || bounding_box.getMinY() <= 0.1 || bounding_box.getMaxY() >= map_size.height - 0.1)
+    {
+        CCLOG("bullet hit border");
+        return false;
+    }
     
     TMXLayer* layer0 = getLayer("layer_0");
     

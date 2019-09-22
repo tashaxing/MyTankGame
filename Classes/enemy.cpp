@@ -225,4 +225,6 @@ void Enemy::hit()
 void Enemy::die()
 {
     SimpleAudioEngine::getInstance()->playEffect("sound/eexplosion.wav");
+    
+    // TODO: enemy die animation
 }
