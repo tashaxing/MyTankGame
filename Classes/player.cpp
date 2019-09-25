@@ -145,6 +145,7 @@ void Player::move(float tm)
             break;
         case RIGHT:
             setPositionX(getPositionX() + kMoveSpeed);
+            break;
         default:
             break;
     }

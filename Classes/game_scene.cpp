@@ -4,6 +4,8 @@
 using namespace CocosDenshion;
 
 // 全局定义
+const int kTotalRound = 20;
+
 const int kMapZorder = 0;
 const int kItemZorder = 1;
 const int kJoypadZorder = 3;
@@ -40,6 +42,9 @@ void GameScene::initWithRound(int round)
     
     // 初始化游戏标志
     m_is_over = false;
+    
+    // 初始化坦克定时标志
+    m_is_clock = false;
     
     Point visible_origin = Director::getInstance()->getVisibleOrigin();
     Size visible_size = Director::getInstance()->getVisibleSize();
@@ -178,7 +183,10 @@ void GameScene::onBomb()
 
 void GameScene::onClock()
 {
+    m_is_clock = true;
     
+    for (Enemy* enemy : m_enemies)
+        enemy->m_moving = false;
 }
 
 void GameScene::onShovel()
@@ -327,8 +335,11 @@ void GameScene::gameWin()
     
     SimpleAudioEngine::getInstance()->playBackgroundMusic("sound/gamewin.wav", false);
     
-    // 延时一会儿再切换关卡
-    int next_round = m_round + 1; // mod, // 关卡提升
+    // 延时一会儿再切换关卡,通关后从第一关开始
+    int next_round = m_round + 1; // 关卡提升
+    if (next_round > kTotalRound)
+        next_round = 1;
+    
     Scene* scene = GameScene::createScene(next_round);
     TransitionScene* transition_scene = TransitionFade::create(0.5, scene);
     Director::getInstance()->replaceScene(transition_scene);
@@ -341,6 +352,19 @@ void GameScene::gameOver()
     m_is_over = true;
     
     // 游戏结束的标签
+    Point visible_origin = Director::getInstance()->getVisibleOrigin();
+    Size visible_size = Director::getInstance()->getVisibleSize();
+    
+    Label *gameover_label = Label::createWithTTF("game over", "fonts/Marker Felt.ttf", 24);
+    gameover_label->setColor(Color3B::WHITE);
+    gameover_label->setPosition(visible_origin.x + visible_size.width / 2,
+                                visible_origin.y - 30);
+    addChild(gameover_label, kLevelSplashZorder); // 分数浮层在最上方
+    
+    // 播放动画，飞入画面
+    auto move_to = MoveTo::create(1.0, Point(visible_origin.x + visible_size.width / 2,
+                                             visible_origin.y + visible_size.height / 2));
+    gameover_label->runAction(move_to);
 }
 
 void GameScene::update(float dt)
@@ -465,7 +489,7 @@ void GameScene::update(float dt)
         if (m_battle_field->isBulletCollide(bullet->getBoundingBox(), bullet->m_type))
         {
             m_player_bullets.eraseObject(bullet);
-            bullet->removeFromParent();
+            bullet->removeFromParent(); // 标记起来统一清除，避免指针问题
         }
     }
     

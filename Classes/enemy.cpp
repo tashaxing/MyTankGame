@@ -6,7 +6,7 @@ using namespace CocosDenshion;
 const float kFrameUpdateInterval = 0.02;
 
 const float kMoveSpeedNormal = 0.5;
-const float kMoveSpeedArmor = 0.8;
+const float kMoveSpeedArmor = 0.3;
 const float kMoveSpeedFast = 1.2;
 
 bool Enemy::init()
@@ -26,12 +26,15 @@ void Enemy::initWithType(EnemyType enemy_type)
     {
         case NORMAL:
             m_life = 1;
+            m_speed = kMoveSpeedNormal;
             break;
         case ARMOR:
             m_life = 3;
+            m_speed = kMoveSpeedArmor;
             break;
         case SPEED:
             m_life = 2;
+            m_speed = kMoveSpeedFast;
             break;
         default:
             break;
@@ -50,12 +53,12 @@ void Enemy::initWithType(EnemyType enemy_type)
     Animate* enemy_born_animation = Animate::create(AnimationCache::getInstance()->getAnimation("enemy_born_animation"));
     runAction(Sequence::create(enemy_born_animation, CallFunc::create([&](){
         m_status = ESIMPLE; // 动画完毕才能接收伤害
-        m_moving = true;
+        m_moving = true; // 可移动
         changeDirection(); // 根据方向切换纹理
+        
+        // 调度坦克移动
+        schedule(schedule_selector(Enemy::move), kFrameUpdateInterval);
     }), NULL) );
-    
-    // 调度坦克移动
-    schedule(schedule_selector(Enemy::move), kFrameUpdateInterval);
 }
 
 void Enemy::setSize(Size size)
@@ -168,6 +171,7 @@ void Enemy::move(float tm)
             break;
         case RIGHT:
             setPositionX(getPositionX() + m_speed);
+            break;
         default:
             break;
     }

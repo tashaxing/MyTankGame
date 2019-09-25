@@ -42,6 +42,7 @@ private:
     void gameWin();
     void gameOver();
     bool m_is_over;
+    bool m_is_clock;
     int m_player1_life = 2; // 初始生命值
     int m_player2_life = 2;
 

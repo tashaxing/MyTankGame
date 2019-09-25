@@ -239,20 +239,6 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
     if (MinY >= map_size.height)
         MinY = map_size.height - 0.1;
     
-    CCLOG("box origin x: %f, origin y: %f", bounding_box.origin.x, bounding_box.origin.y);
-    CCLOG("MinX: %f, MaxX: %f, MinY: %f, MaxY: %f", MinX, MaxX, MinY, MaxY);
-    
-    CCLOG("=======");
-    CCLOG("left down pos: %d, %d", int(MinX / tile_size.width),
-          int(MinY / tile_size.height));
-    CCLOG("left up pos: %d, %d", int(MinX / tile_size.width),
-          int(MaxY / tile_size.height));
-    CCLOG("right down pos: %d, %d", int(MaxX / tile_size.width),
-          int(MinY / tile_size.height));
-    CCLOG("right up pos: %d, %d", int(MaxX / tile_size.width),
-          int(MaxY / tile_size.height));
-    CCLOG("=======");
-    
     int left_down_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
                                                   int(MinY / tile_size.height)));
     int left_up_gid = layer0->getTileGIDAt(Vec2(int(MinX / tile_size.width),
@@ -262,12 +248,6 @@ bool BattleField::isTankCollide(Rect bounding_box, JoyDirection direction)
     int right_up_gid = layer0->getTileGIDAt(Vec2(int(MaxX / tile_size.width),
                                                  int(MaxY / tile_size.height)));
     
-    
-    CCLOG("gid left_down: %d, left_up: %d, right_down: %d, right_up: %d", left_down_gid, left_up_gid, right_down_gid, right_up_gid);
-    
-    CCLOG("gid tile type left_down: %d, left_up: %d, right_down: %d, right_up: %d",
-          kTileHash[left_down_gid], kTileHash[left_up_gid], kTileHash[right_down_gid], kTileHash[right_up_gid]);
-
     // 若有一个顶点所在范围不是空白或草坪就算碰撞（其实如果考虑有船过水的话要复杂一些）
     // 分方向判断才能保证坦克不会被卡住，换了方向后就能继续移动
     if (direction == UP)

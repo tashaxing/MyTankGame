@@ -46,7 +46,6 @@ public:
     
 private:
     Size m_size;
-    
     float m_speed;
 };
 
