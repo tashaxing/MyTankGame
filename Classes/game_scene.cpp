@@ -68,6 +68,8 @@ void GameScene::initWithRound(int round)
     CCLOG("map array, row %f, col %f", map_array.height, map_array.width);
     CCLOG("map size, width %f, height %f", map_size.width, map_size.height);
     
+    // TODO: 添加计分板
+    
     // 加载玩家坦克
     m_player1 = Player::create();
     m_player1->initWithType(P1);
@@ -123,6 +125,7 @@ void GameScene::onEnumDirection(JoyDirection direction)
     // 只有方向改变时才给玩家坦克发控制指令
     if (direction != pre_direction)
     {
+        // TODO: 每次重置为最近的整点方块中心位置，减少被卡住的概率
         m_player1->setDirection(direction);
         pre_direction = direction;
     }
