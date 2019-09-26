@@ -5,8 +5,6 @@ USING_NS_CC;
 const float kLowSpeed = 3.0;
 const float kHighSpeed = 5.0;
 
-const int kLowKillHp = 10;
-
 const float kFrameUpdateInterval = 0.02;
 
 bool Bullet::init()
@@ -17,7 +15,7 @@ bool Bullet::init()
     return true;
 }
 
-void Bullet::initWithDirection(JoyDirection direction)
+void Bullet::initWithDirection(JoyDirection direction, BulletType bullet_type)
 {
     m_direction = direction;
     
@@ -26,9 +24,7 @@ void Bullet::initWithDirection(JoyDirection direction)
     
     // 设置纹理和子弹速度
     setTexture("img/tank/bullet.png");
-    m_type = BASE; // 默认是普通子弹
-    m_speed = kLowSpeed;
-    m_kill_hp = kLowKillHp;
+    m_type = bullet_type; // 默认是普通子弹
     
     // 调度子弹的移动，固定间隔移动固定单位
     schedule(schedule_selector(Bullet::move), kFrameUpdateInterval);
@@ -36,20 +32,26 @@ void Bullet::initWithDirection(JoyDirection direction)
 
 void Bullet::move(float tm)
 {
+    float speed = 0.0;
+    if (m_type == BASE)
+        speed = kLowSpeed;
+    else if (m_type == POWER)
+        speed = kHighSpeed;
+    
     // 每帧更新，沿初始方向移动
     switch (m_direction)
     {
         case UP:
-            setPositionY(getPositionY() + kLowSpeed);
+            setPositionY(getPositionY() + speed);
             break;
         case DOWN:
-            setPositionY(getPositionY() - kLowSpeed);
+            setPositionY(getPositionY() - speed);
             break;
         case LEFT:
-            setPositionX(getPositionX() - kLowSpeed);
+            setPositionX(getPositionX() - speed);
             break;
         case RIGHT:
-            setPositionX(getPositionX() + kLowSpeed);
+            setPositionX(getPositionX() + speed);
         default:
             break;
     }

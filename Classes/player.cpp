@@ -188,26 +188,29 @@ Vector<Bullet*> Player::shootDouble()
     for (int i = 0; i < 2; i++)
     {
         // 子弹从坦克头部打出来
-        float bullet_distance = 20.0;
         Bullet* bullet = Bullet::create();
-        bullet->initWithDirection(m_head_direction);
-        bullet->m_type = POWER; // 火力增强子弹
+        
+        BulletType bullet_type = BASE;
+        // 第一发火力增强
+        if (i == 0)
+            bullet_type = POWER;
+        bullet->initWithDirection(m_head_direction, bullet_type);
         switch (m_head_direction)
         {
             case UP:
                 bullet->setPosition(getPositionX(),
-                                    getPositionY() + getContentSize().height / 2 + i * bullet_distance);
+                                    getPositionY() + getContentSize().height / 2);
                 break;
             case DOWN:
                 bullet->setPosition(getPositionX(),
-                                    getPositionY() - getContentSize().height / 2 - i * bullet_distance);
+                                    getPositionY() - getContentSize().height / 2);
                 break;
             case LEFT:
-                bullet->setPosition(getPositionX() - getContentSize().width / 2 - i * bullet_distance,
+                bullet->setPosition(getPositionX() - getContentSize().width / 2,
                                     getPositionY());
                 break;
             case RIGHT:
-                bullet->setPosition(getPositionX() + getContentSize().width / 2 + i * bullet_distance,
+                bullet->setPosition(getPositionX() + getContentSize().width / 2,
                                     getPositionY());
                 break;
             default:

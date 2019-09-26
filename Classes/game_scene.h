@@ -36,13 +36,14 @@ public:
     void onMiniTank(); // 玩家拾取到命，增加一条命
     
     int m_round = 1; // 第几关，默认第一关
-    int m_enemy_count = 20; // 每关20个
+    int m_enemy_count = 10; // 每关10个
     
 private:
     void gameWin();
     void gameOver();
     bool m_is_over;
     bool m_is_clock;
+    bool m_is_shovel;
     int m_player1_life = 2; // 初始生命值
     int m_player2_life = 2;
 

@@ -12,6 +12,8 @@ const int kJoypadZorder = 3;
 const int kLevelSplashZorder = 5;
 
 const float kEnemyBulletInterval = 1.0;
+const float kClockDuration = 10.0;
+const float kShovelDuration = 15.0;
 
 const float kTankSizeFactor = 0.8;
 const int kEnemyBatchTankCount = 4;
@@ -45,6 +47,9 @@ void GameScene::initWithRound(int round)
     
     // 初始化坦克定时标志
     m_is_clock = false;
+    
+    // 初始化总部砖块
+    m_is_shovel = false;
     
     Point visible_origin = Director::getInstance()->getVisibleOrigin();
     Size visible_size = Director::getInstance()->getVisibleSize();
@@ -184,14 +189,27 @@ void GameScene::onBomb()
 void GameScene::onClock()
 {
     m_is_clock = true;
-    
     for (Enemy* enemy : m_enemies)
         enemy->m_moving = false;
+    
+    // 固定时间间隔后恢复
+    scheduleOnce([&](float delay){
+        m_is_clock = false;
+        for (Enemy* enemy : m_enemies)
+            enemy->m_moving = true;
+    }, kClockDuration, "clock");
 }
 
 void GameScene::onShovel()
 {
+    m_is_shovel = true;
     m_battle_field->protectEagle();
+    
+    // 固定时间间隔后恢复
+    scheduleOnce([&](float delay){
+        m_is_shovel = false;
+        m_battle_field->unprotectEagle();
+    }, kShovelDuration, "shovel");
 }
 
 void GameScene::onMiniTank()
@@ -201,6 +219,14 @@ void GameScene::onMiniTank()
 
 void GameScene::generateEnemy(float tm)
 {
+    // 最后剩下的则停掉坦克生成
+    if (m_enemies.size() == m_enemy_count)
+    {
+        unschedule(schedule_selector(GameScene::generateEnemy));
+        return;
+    }
+    
+    // 当前还有完整的一批，则不产生
     if (m_enemies.size() >= kEnemyBatchTankCount)
         return;
     
@@ -245,6 +271,10 @@ void GameScene::generateEnemy(float tm)
         enemy->setDirection(LEFT);
     else
         enemy->setDirection(RIGHT);
+    
+    // 根据定时决定初始是否可以移动
+    if (m_is_clock)
+        enemy->m_moving = false;
     
     addChild(enemy, kMapZorder);
     m_enemies.pushBack(enemy);
@@ -335,13 +365,14 @@ void GameScene::gameWin()
     
     SimpleAudioEngine::getInstance()->playBackgroundMusic("sound/gamewin.wav", false);
     
-    // 延时一会儿再切换关卡,通关后从第一关开始
+    // 切换关卡,通关后从第一关开始
     int next_round = m_round + 1; // 关卡提升
     if (next_round > kTotalRound)
         next_round = 1;
     
+    // FIXME: should delay before next round
     Scene* scene = GameScene::createScene(next_round);
-    TransitionScene* transition_scene = TransitionFade::create(0.5, scene);
+    TransitionScene* transition_scene = TransitionFade::create(0.0, scene);
     Director::getInstance()->replaceScene(transition_scene);
 }
 
@@ -546,8 +577,11 @@ void GameScene::update(float dt)
         }
         else
         {
-            CCLOG("enemy can move");
-            enemy->m_moving = true;
+            if (!m_is_clock)
+            {
+                CCLOG("enemy can move");
+                enemy->m_moving = true;
+            }
         }
     }
     
